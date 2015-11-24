@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
   s.name = 'Medea'
   s.version = '0.1'
   s.license = 'MIT'
-  s.summary = 'JSON for Swift 2 (Linux ready)'
+  s.summary = 'JSON (RFC 7159) for Swift 2 (Linux ready)'
   s.homepage = 'https://github.com/Zewo/Medea'
   s.authors = { 'Paulo Faria' => 'paulo.faria.rl@gmail.com' }
   s.source = { :git => 'https://github.com/Zewo/Medea.git', :tag => 'v0.1' }
@@ -10,7 +10,13 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '8.0'
   s.osx.deployment_target = '10.9'
 
-  s.source_files = 'Medea/**/*.swift'
+  s.source_files = 'Dependencies/Aeson/*.c', 'Medea/**/*.swift'
+
+  s.xcconfig =  {
+    'SWIFT_INCLUDE_PATHS' => '$(SRCROOT)/Medea/Dependencies'
+  }
+
+  s.preserve_paths = 'Dependencies/*'
 
   s.requires_arc = true
 end
