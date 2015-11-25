@@ -16,6 +16,7 @@ Medea
 ## Usage
 
 ```swift
+import Medea
 
 // parse JSON string
 
