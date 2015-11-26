@@ -29,7 +29,9 @@ public protocol JSONSerializer {
 }
 
 public class DefaultJSONSerializer: JSONSerializer {
-	public init() { }
+    public init() {
+        
+    }
 	
     public func serialize(JSONValue: JSON) -> String {
         switch JSONValue {
