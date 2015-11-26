@@ -29,6 +29,8 @@ public protocol JSONSerializer {
 }
 
 public class DefaultJSONSerializer: JSONSerializer {
+	public init() { }
+	
     public func serialize(JSONValue: JSON) -> String {
         switch JSONValue {
         case .NullValue: return "null"
