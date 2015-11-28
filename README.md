@@ -1,5 +1,5 @@
-Medea
-=========
+JSON
+====
 
 [![Swift 2.1](https://img.shields.io/badge/Swift-2.1-orange.svg?style=flat)](https://developer.apple.com/swift/)
 [![Platforms OS X | iOS](https://img.shields.io/badge/Platforms-OS%20X%20%7C%20iOS-lightgray.svg?style=flat)](https://developer.apple.com/swift/)
@@ -7,7 +7,7 @@ Medea
 [![Carthage Compatible](https://img.shields.io/badge/Carthage-Compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![License MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat)](https://github.com/Carthage/Carthage)
 
-**Medea** provides JSON ([RFC 7159](http://tools.ietf.org/html/rfc7159)) for **Swift 2**.
+**JSON** provides JSON ([RFC 7159](http://tools.ietf.org/html/rfc7159)) for **Swift 2**.
 
 ## Features
 
@@ -16,7 +16,7 @@ Medea
 ## Usage
 
 ```swift
-import Medea
+import JSON
 
 // parse JSON string
 
@@ -58,16 +58,18 @@ let json: JSON = [
 $ gem install cocoapods
 ```
 
-> CocoaPods 0.39.0+ is required to build Medea.
+> CocoaPods 0.39.0+ is required to build JSON.
 
-To integrate **Medea** into your Xcode project using CocoaPods, specify it in your `Podfile`:
+To integrate **JSON** into your Xcode project using CocoaPods, specify it in your `Podfile`:
 
 ```ruby
+source 'https://github.com/Zewo/Specs.git' # Don't forget this
 source 'https://github.com/CocoaPods/Specs.git'
 use_frameworks!
 
-pod 'Medea', '0.1'
+pod 'JSON', '0.1'
 ```
+> **WARNING:** Don't forget  `source 'https://github.com/Zewo/Specs.git'`. This is very important. It should always come before the official CocoaPods repo.
 
 Then, run the following command:
 
@@ -86,15 +88,15 @@ $ brew update
 $ brew install carthage
 ```
 
-To integrate **Medea** into your Xcode project using Carthage, specify it in your `Cartfile`:
+To integrate **JSON** into your Xcode project using Carthage, specify it in your `Cartfile`:
 
 ```ogdl
-github "Zewo/Medea" == 0.1
+github "Zewo/JSON" == 0.1
 ```
 
 ### Command Line Application
 
-To use **Medea** in a command line application:
+To use **JSON** in a command line application:
 
 - Install the [Swift Command Line Application](https://github.com/Zewo/Swift-Command-Line-Application-Template) Xcode template
 - Follow [Cocoa Pods](#cocoapods) or [Carthage](#carthage) instructions.
@@ -102,4 +104,4 @@ To use **Medea** in a command line application:
 License
 -------
 
-**Medea** is released under the MIT license. See LICENSE for details.
+**JSON** is released under the MIT license. See LICENSE for details.

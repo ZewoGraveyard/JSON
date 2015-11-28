@@ -149,11 +149,17 @@ public enum JSON {
     }
 
     public var intValue: Int? {
-        return doubleValue != nil ? Int(doubleValue!) : nil
+        if let v = doubleValue {
+            return Int(v)
+        }
+        return nil
     }
 
     public var uintValue: UInt? {
-        return doubleValue != nil ? UInt(doubleValue!) : nil
+        if let v = doubleValue {
+            return UInt(v)
+        }
+        return nil
     }
 
     public var stringValue: String? {
@@ -177,36 +183,17 @@ public enum JSON {
         }
     }
 
-    public var anyValue: Any? {
-        switch self {
-        case NullValue: return nil
-        case BooleanValue(let bool): return bool
-        case NumberValue(let double): return double
-        case StringValue(let string): return string
-        case ArrayValue(let array): return array.map { $0.anyValue }
-        case ObjectValue(let object):
-            var dictionaryOfAny: [String: Any] = [:]
-            for (key, json) in object {
-                dictionaryOfAny[key] = json.anyValue
-            }
-            return dictionaryOfAny
-        }
-    }
-
-    public var dictionaryOfAnyValue: [String: Any]? {
-        if let dictionaryOfAny = anyValue as? [String: Any] {
-            return dictionaryOfAny
-        }
-        return nil
-    }
-
-    public subscript(index: UInt) -> JSON {
+    public subscript(index: UInt) -> JSON? {
         set {
             switch self {
-            case .ArrayValue(var array):
-                if Int(index) < array.count {
-                    array[Int(index)] = newValue
-                    self = .ArrayValue(array)
+            case .ArrayValue(var a):
+                if Int(index) < a.count {
+                    if let json = newValue {
+                        a[Int(index)] = json
+                    } else {
+                        a[Int(index)] = .NullValue
+                    }
+                    self = .ArrayValue(a)
                 }
             default: break
             }
@@ -214,25 +201,26 @@ public enum JSON {
         get {
             switch self {
             case .ArrayValue(let a):
-                return Int(index) < a.count ? a[Int(index)] : .NullValue
-            default: return .NullValue
+                return Int(index) < a.count ? a[Int(index)] : nil
+            default: return nil
             }
         }
     }
 
-    public subscript(key: String) -> JSON {
+    public subscript(key: String) -> JSON? {
         set {
             switch self {
-            case .ObjectValue(var object):
-                object[key] = newValue
-                self = .ObjectValue(object)
+            case .ObjectValue(var o):
+                o[key] = newValue
+                self = .ObjectValue(o)
             default: break
             }
         }
         get {
             switch self {
-            case .ObjectValue(let object): return object[key] ?? .NullValue
-            default: return .NullValue
+            case .ObjectValue(let o):
+                return o[key]
+            default: return nil
             }
         }
     }
