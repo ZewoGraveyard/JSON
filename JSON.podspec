@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-  s.name = 'Medea'
+  s.name = 'JSON'
   s.version = '0.2'
   s.license = 'MIT'
   s.summary = 'JSON (RFC 7159) for Swift 2 (Linux ready)'
