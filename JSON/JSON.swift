@@ -32,28 +32,28 @@ public enum JSON {
     case ArrayValue([JSON])
     case ObjectValue([String: JSON])
 
-    static func from(value: Bool) -> JSON {
+    public static func from(value: Bool) -> JSON {
         return .BooleanValue(value)
     }
 
-    static func from(value: Double) -> JSON {
+    public static func from(value: Double) -> JSON {
         return .NumberValue(value)
     }
 
-    static func from(value: String) -> JSON {
+    public static func from(value: String) -> JSON {
         return .StringValue(value)
     }
 
-    static func from(value: [JSON]) -> JSON {
+    public static func from(value: [JSON]) -> JSON {
         return .ArrayValue(value)
     }
 
-    static func from(value: [String: JSON]) -> JSON {
+    public static func from(value: [String: JSON]) -> JSON {
         return .ObjectValue(value)
     }
 
     // TODO: decide what to do if Any is not a JSON value
-    static func from(values: [Any]) -> JSON {
+    public static func from(values: [Any]) -> JSON {
         var jsonArray: [JSON] = []
         for value in values {
             if let value = value as? Bool {
@@ -76,7 +76,7 @@ public enum JSON {
     }
 
     // TODO: decide what to do if Any is not a JSON value
-    static func from(value: [String: Any]) -> JSON {
+    public static func from(value: [String: Any]) -> JSON {
         var jsonDictionary: [String: JSON] = [:]
         for (key, value) in value {
             if let value = value as? Bool {
