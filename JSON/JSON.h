@@ -1,4 +1,4 @@
-// MedeaTests.swift
+// JSON.h
 //
 // The MIT License (MIT)
 //
@@ -21,37 +21,3 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
-import XCTest
-import Medea
-
-class MedeaTests: XCTestCase {
-    func testExample() {
-        let parsedJson = try! JSONParser.parse("{\"foo\":\"bar\"}")
-        print(parsedJson.debugDescription)
-
-        let json: JSON = [
-            "null": nil,
-            "string": "Foo Bar",
-            "boolean": true,
-            "array": [
-                "1",
-                2,
-                nil,
-                true,
-                ["1", 2, nil, false],
-                ["a": "b"]
-            ],
-            "object": [
-                "a": "1",
-                "b": 2,
-                "c": nil,
-                "d": false,
-                "e": ["1", 2, nil, false],
-                "f": ["a": "b"]
-            ],
-            "number": 1969
-        ]
-        print(json.debugDescription)
-    }
-}

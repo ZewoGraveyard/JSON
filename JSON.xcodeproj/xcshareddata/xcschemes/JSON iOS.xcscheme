@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3A1C55881BECE19A006EC3F7"
-               BuildableName = "Medea.framework"
-               BlueprintName = "Medea iOS"
-               ReferencedContainer = "container:Medea.xcodeproj">
+               BuildableName = "JSON.framework"
+               BlueprintName = "JSON iOS"
+               ReferencedContainer = "container:JSON.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -34,9 +34,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "B0070D311C05207D009B50CB"
-               BuildableName = "MedeaTests.xctest"
-               BlueprintName = "Medea iOS Tests"
-               ReferencedContainer = "container:Medea.xcodeproj">
+               BuildableName = "JSONTests.xctest"
+               BlueprintName = "JSON iOS Tests"
+               ReferencedContainer = "container:JSON.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -44,9 +44,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3A1C55881BECE19A006EC3F7"
-            BuildableName = "Medea.framework"
-            BlueprintName = "Medea iOS"
-            ReferencedContainer = "container:Medea.xcodeproj">
+            BuildableName = "JSON.framework"
+            BlueprintName = "JSON iOS"
+            ReferencedContainer = "container:JSON.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -66,9 +66,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3A1C55881BECE19A006EC3F7"
-            BuildableName = "Medea.framework"
-            BlueprintName = "Medea iOS"
-            ReferencedContainer = "container:Medea.xcodeproj">
+            BuildableName = "JSON.framework"
+            BlueprintName = "JSON iOS"
+            ReferencedContainer = "container:JSON.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -84,9 +84,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3A1C55881BECE19A006EC3F7"
-            BuildableName = "Medea.framework"
-            BlueprintName = "Medea iOS"
-            ReferencedContainer = "container:Medea.xcodeproj">
+            BuildableName = "JSON.framework"
+            BlueprintName = "JSON iOS"
+            ReferencedContainer = "container:JSON.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>
