@@ -79,7 +79,7 @@ public class DefaultJSONSerializer: JSONSerializer {
     }
 }
 
-public class PrettyJSONSerializer: DefaultJSONSerializer {
+public final class PrettyJSONSerializer: DefaultJSONSerializer {
     var indentLevel = 0
 
     override public func serializeArray(a: [JSON]) -> String {
