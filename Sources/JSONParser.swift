@@ -24,7 +24,11 @@
 //
 // This file has been modified from its original project Swift-JsonSerializer
 
-import Aeson
+#if os(Linux)
+    import Glibc
+#else
+    import Darwin.C
+#endif
 
 public struct JSONParser {
     public static func parse(source: String) throws -> JSON {

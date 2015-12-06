@@ -186,7 +186,8 @@ public enum JSON {
     public subscript(index: UInt) -> JSON? {
         set {
             switch self {
-            case .ArrayValue(var a):
+            case .ArrayValue(let a):
+                var a = a
                 if Int(index) < a.count {
                     if let json = newValue {
                         a[Int(index)] = json
@@ -210,7 +211,8 @@ public enum JSON {
     public subscript(key: String) -> JSON? {
         set {
             switch self {
-            case .ObjectValue(var o):
+            case .ObjectValue(let o):
+                var o = o 
                 o[key] = newValue
                 self = .ObjectValue(o)
             default: break
