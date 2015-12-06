@@ -1,4 +1,0 @@
-module Aeson [system] {
-    header "Aeson/aeson_swift.h"
-    export *
-}
