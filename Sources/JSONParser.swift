@@ -40,7 +40,7 @@ public struct JSONParser {
     }
 
     public static func parse(source: [Int8]) throws -> JSON {
-        return try parse(source.map({UInt8($0)}))
+        return try parse(source.map({UInt8(bitPattern: $0)}))
     }
 }
 
@@ -134,7 +134,7 @@ extension GenericJSONParser {
         advance()
         var buffer: [CChar] = []
 
-        LOOP: for ; cur != end; advance() {
+        LOOP: while cur != end {
             switch currentChar {
             case Char(ascii: "\\"):
                 advance()
@@ -160,6 +160,7 @@ extension GenericJSONParser {
             case Char(ascii: "\""): break LOOP
             default: buffer.append(CChar(bitPattern: currentChar))
             }
+            advance()
         }
 
         if !expect("\"") {
@@ -184,7 +185,7 @@ extension GenericJSONParser {
 
             while let d = hexToDigit(nextChar) {
                 advance()
-                length++
+                length += 1
 
                 if length > 8 {
                     break
@@ -211,12 +212,13 @@ extension GenericJSONParser {
         switch currentChar {
         case Char(ascii: "0"): advance()
         case Char(ascii: "1") ... Char(ascii: "9"):
-            for ; cur != end; advance() {
+            while cur != end {
                 if let value = digitToInt(currentChar) {
                     integer = (integer * 10) + Int64(value)
                 } else {
                     break
                 }
+                advance()
             }
         default:
             throw JSONParseError.InvalidStringError(
@@ -240,14 +242,15 @@ extension GenericJSONParser {
             var factor = 0.1
             var fractionLength = 0
 
-            for ; cur != end; advance() {
+            while cur != end {
                 if let value = digitToInt(currentChar) {
                     fraction += (Double(value) * factor)
                     factor /= 10
-                    fractionLength++
+                    fractionLength += 1
                 } else {
                     break
                 }
+                advance()
             }
 
             if fractionLength == 0 {
@@ -271,13 +274,14 @@ extension GenericJSONParser {
             exponent = 0
             var exponentLength = 0
 
-            for ; cur != end; advance() {
+            while cur != end {
                 if let value = digitToInt(currentChar) {
                     exponent = (exponent * 10) + Int64(value)
-                    exponentLength++
+                    exponentLength += 1
                 } else {
                     break
                 }
+                advance()
             }
 
             if exponentLength == 0 {
@@ -393,13 +397,15 @@ extension GenericJSONParser {
         var p = target.utf8Start
         let endp = p.advancedBy(Int(target.byteSize))
         
-        for ; p != endp; p++, advance() {
+        while p != endp {
             if p.memory != currentChar {
                 cur = start
                 lineNumber = l
                 columnNumber = c
                 return false
             }
+            p += 1
+            advance()
         }
         
         return true
@@ -423,23 +429,24 @@ extension GenericJSONParser {
             switch currentChar {
                 
             case Char(ascii: "\n"):
-                lineNumber++
+                lineNumber += 1
                 columnNumber = 1
                 
             default:
-                columnNumber++
+                columnNumber += 1
             }
         }
     }
     
     private func skipWhitespaces() {
-        for ; cur != end; advance() {
+        while cur != end {
             switch currentChar {
             case Char(ascii: " "), Char(ascii: "\t"), Char(ascii: "\r"), Char(ascii: "\n"):
                 break
             default:
                 return
             }
+            advance()
         }
     }
 }
