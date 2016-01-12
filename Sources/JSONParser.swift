@@ -423,7 +423,7 @@ extension GenericJSONParser {
     
     private func advance() {
         assert(cur != end, "out of range")
-        cur++
+        cur += 1
         
         if cur != end {
             switch currentChar {
