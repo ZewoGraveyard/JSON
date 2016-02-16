@@ -33,7 +33,7 @@ public class JSONInterchangeDataSerializer: InterchangeDataSerializer {
         return serializeToString(data).data
     }
 
-    func serializeToString(data: InterchangeData) -> String {
+    public func serializeToString(data: InterchangeData) -> String {
         switch data {
         case .NullValue: return "null"
         case .BooleanValue(let b): return b ? "true" : "false"

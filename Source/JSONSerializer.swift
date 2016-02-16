@@ -33,7 +33,7 @@ public class JSONSerializer {
         return serializeToString(json).data
     }
 
-    func serializeToString(json: JSON) -> String {
+    public func serializeToString(json: JSON) -> String {
         switch json {
         case .NullValue: return "null"
         case .BooleanValue(let b): return b ? "true" : "false"
