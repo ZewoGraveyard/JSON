@@ -21,8 +21,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-//
-// This file has been modified from its original project Swift-JsonSerializer
+
+public enum JSONError: ErrorType {
+    case IncompatibleType
+}
 
 public enum JSON {
     case NullValue
@@ -40,6 +42,10 @@ public enum JSON {
         return .NumberValue(value)
     }
 
+    public static func from(value: Int) -> JSON {
+        return .NumberValue(Double(value))
+    }
+
     public static func from(value: String) -> JSON {
         return .StringValue(value)
     }
@@ -50,53 +56,6 @@ public enum JSON {
 
     public static func from(value: [String: JSON]) -> JSON {
         return .ObjectValue(value)
-    }
-
-    // TODO: decide what to do if Any is not a JSON value
-    public static func from(values: [Any]) -> JSON {
-        var jsonArray: [JSON] = []
-        for value in values {
-            if let value = value as? Bool {
-                jsonArray.append(JSON.from(value))
-            }
-            if let value = value as? Double {
-                jsonArray.append(JSON.from(value))
-            }
-            if let value = value as? String {
-                jsonArray.append(JSON.from(value))
-            }
-            if let value = value as? [Any] {
-                jsonArray.append(JSON.from(value))
-            }
-            if let value = value as? [String: Any] {
-                jsonArray.append(JSON.from(value))
-            }
-        }
-        return JSON.from(jsonArray)
-    }
-
-    // TODO: decide what to do if Any is not a JSON value
-    public static func from(value: [String: Any]) -> JSON {
-        var jsonDictionary: [String: JSON] = [:]
-        for (key, value) in value {
-            if let value = value as? Bool {
-                jsonDictionary[key] = JSON.from(value)
-            }
-            if let value = value as? Double {
-                jsonDictionary[key] = JSON.from(value)
-            }
-            if let value = value as? String {
-                jsonDictionary[key] = JSON.from(value)
-            }
-            if let value = value as? [Any] {
-                jsonDictionary[key] = JSON.from(value)
-            }
-            if let value = value as? [String: Any] {
-                jsonDictionary[key] = JSON.from(value)
-            }
-        }
-
-        return JSON.from(jsonDictionary)
     }
 
     public var isBoolean: Bool {
@@ -134,75 +93,174 @@ public enum JSON {
         }
     }
 
-    public var boolValue: Bool? {
+    public var bool: Bool? {
         switch self {
         case .BooleanValue(let b): return b
         default: return nil
         }
     }
 
-    public var doubleValue: Double? {
+    public var double: Double? {
         switch self {
         case .NumberValue(let n): return n
         default: return nil
         }
     }
 
-    public var intValue: Int? {
-        if let v = doubleValue {
+    public var int: Int? {
+        if let v = double {
             return Int(v)
         }
         return nil
     }
 
-    public var uintValue: UInt? {
-        if let v = doubleValue {
+    public var uint: UInt? {
+        if let v = double {
             return UInt(v)
         }
         return nil
     }
 
-    public var stringValue: String? {
+    public var string: String? {
         switch self {
         case .StringValue(let s): return s
         default: return nil
         }
     }
 
-    public var arrayValue: [JSON]? {
+    public var array: [JSON]? {
         switch self {
         case .ArrayValue(let array): return array
         default: return nil
         }
     }
 
-    public var dictionaryValue: [String: JSON]? {
+    public var dictionary: [String: JSON]? {
         switch self {
         case .ObjectValue(let dictionary): return dictionary
         default: return nil
         }
     }
 
-    public subscript(index: UInt) -> JSON? {
+    public func get<T>() -> T? {
+        switch self {
+        case NullValue:
+            return nil
+        case BooleanValue(let bool):
+            return bool as? T
+        case NumberValue(let number):
+            return number as? T
+        case StringValue(let string):
+            return string as? T
+        case ArrayValue(let array):
+            return array as? T
+        case ObjectValue(let object):
+            return object as? T
+        }
+    }
+
+    public func get<T>() throws -> T {
+        switch self {
+        case BooleanValue(let bool):
+            if let value = bool as? T {
+                return value
+            }
+
+        case NumberValue(let number):
+            if let value = number as? T {
+                return value
+            }
+
+        case StringValue(let string):
+            if let value = string as? T {
+                return value
+            }
+
+        case ArrayValue(let array):
+            if let value = array as? T {
+                return value
+            }
+
+        case ObjectValue(let object):
+            if let value = object as? T {
+                return value
+            }
+
+        default: break
+        }
+
+        throw JSONError.IncompatibleType
+    }
+
+    public func asBool() throws -> Bool {
+        if let value = bool {
+            return value
+        }
+        throw JSONError.IncompatibleType
+    }
+
+    public func asDouble() throws -> Double {
+        if let value = double {
+            return value
+        }
+        throw JSONError.IncompatibleType
+    }
+
+    public func asInt() throws -> Int {
+        if let value = int {
+            return value
+        }
+        throw JSONError.IncompatibleType
+    }
+
+    public func asUInt() throws -> UInt {
+        if let value = uint {
+            return UInt(value)
+        }
+        throw JSONError.IncompatibleType
+    }
+
+    public func asString() throws -> String {
+        if let value = string {
+            return value
+        }
+        throw JSONError.IncompatibleType
+    }
+
+    public func asArray() throws -> [JSON] {
+        if let value = array {
+            return value
+        }
+        throw JSONError.IncompatibleType
+    }
+
+    public func asDictionary() throws -> [String: JSON] {
+        if let value = dictionary {
+            return value
+        }
+        throw JSONError.IncompatibleType
+    }
+
+    public subscript(index: Int) -> JSON? {
         set {
             switch self {
-            case .ArrayValue(let a):
-                var a = a
-                if Int(index) < a.count {
+            case .ArrayValue(let array):
+                var array = array
+                if index < array.count {
                     if let json = newValue {
-                        a[Int(index)] = json
+                        array[index] = json
                     } else {
-                        a[Int(index)] = .NullValue
+                        array[index] = .NullValue
                     }
-                    self = .ArrayValue(a)
+                    self = .ArrayValue(array)
                 }
             default: break
             }
         }
         get {
             switch self {
-            case .ArrayValue(let a):
-                return Int(index) < a.count ? a[Int(index)] : nil
+            case .ArrayValue(let array):
+                return index < array.count ? array[index] : nil
             default: return nil
             }
         }
@@ -211,36 +269,20 @@ public enum JSON {
     public subscript(key: String) -> JSON? {
         set {
             switch self {
-            case .ObjectValue(let o):
-                var o = o 
-                o[key] = newValue
-                self = .ObjectValue(o)
+            case .ObjectValue(let object):
+                var object = object
+                object[key] = newValue
+                self = .ObjectValue(object)
             default: break
             }
         }
         get {
             switch self {
-            case .ObjectValue(let o):
-                return o[key]
+            case .ObjectValue(let object):
+                return object[key]
             default: return nil
             }
         }
-    }
-
-    public func serialize(serializer: JSONSerializer) -> String {
-        return serializer.serialize(self)
-    }
-}
-
-extension JSON: CustomStringConvertible {
-    public var description: String {
-        return serialize(DefaultJSONSerializer())
-    }
-}
-
-extension JSON: CustomDebugStringConvertible {
-    public var debugDescription: String {
-        return serialize(PrettyJSONSerializer())
     }
 }
 
@@ -306,20 +348,32 @@ extension JSON: FloatLiteralConvertible {
 }
 
 extension JSON: StringLiteralConvertible {
-    public typealias UnicodeScalarLiteralType = String
+    public init(unicodeScalarLiteral value: String) {
+        self = .StringValue(value)
+    }
 
-    public init(unicodeScalarLiteral value: UnicodeScalarLiteralType) {
+    public init(extendedGraphemeClusterLiteral value: String) {
         self = .StringValue(value)
     }
-    
-    public typealias ExtendedGraphemeClusterLiteralType = String
-    
-    public init(extendedGraphemeClusterLiteral value: ExtendedGraphemeClusterType) {
-        self = .StringValue(value)
-    }
-    
+
     public init(stringLiteral value: StringLiteralType) {
         self = .StringValue(value)
+    }
+}
+
+extension JSON: StringInterpolationConvertible {
+    public init(stringInterpolation strings: JSON...) {
+        var string = ""
+
+        for s in strings {
+            string += s.string!
+        }
+
+        self = .StringValue(String(string))
+    }
+
+    public init<T>(stringInterpolationSegment expr: T) {
+        self = .StringValue(String(expr))
     }
 }
 
@@ -336,7 +390,19 @@ extension JSON: DictionaryLiteralConvertible {
         for pair in elements {
             dictionary[pair.0] = pair.1
         }
-        
+
         self = .ObjectValue(dictionary)
+    }
+}
+
+extension JSON: CustomStringConvertible {
+    public var description: String {
+        return JSONSerializer().serializeToString(self)
+    }
+}
+
+extension JSON: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        return PrettyJSONSerializer().serializeToString(self)
     }
 }

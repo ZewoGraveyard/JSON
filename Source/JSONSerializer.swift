@@ -24,15 +24,17 @@
 //
 // This file has been modified from its original project Swift-JsonSerializer
 
-public protocol JSONSerializer {
-    func serialize(JSONValue: JSON) -> String
-}
+@_exported import Data
 
-public class DefaultJSONSerializer: JSONSerializer {
+public class JSONSerializer {
     public init() {}
-	
-    public func serialize(JSONValue: JSON) -> String {
-        switch JSONValue {
+
+    public func serialize(json: JSON) -> Data {
+        return serializeToString(json).data
+    }
+
+    func serializeToString(json: JSON) -> String {
+        switch json {
         case .NullValue: return "null"
         case .BooleanValue(let b): return b ? "true" : "false"
         case .NumberValue(let n): return serializeNumber(n)
@@ -54,7 +56,7 @@ public class DefaultJSONSerializer: JSONSerializer {
         var s = "["
 
         for i in 0 ..< a.count {
-            s += a[i].serialize(self)
+            s += serializeToString(a[i])
 
             if i != (a.count - 1) {
                 s += ","
@@ -69,7 +71,7 @@ public class DefaultJSONSerializer: JSONSerializer {
         var i = 0
 
         for entry in o {
-            s += "\(escapeAsJSONString(entry.0)):\(entry.1.serialize(self))"
+            s += "\(escapeAsJSONString(entry.0)):\(serialize(entry.1))"
             if i != (o.count - 1) {
                 s += ","
             }
@@ -80,7 +82,7 @@ public class DefaultJSONSerializer: JSONSerializer {
     }
 }
 
-public final class PrettyJSONSerializer: DefaultJSONSerializer {
+public final class PrettyJSONSerializer: JSONSerializer {
     var indentLevel = 0
 
     override public func serializeArray(a: [JSON]) -> String {
@@ -90,7 +92,7 @@ public final class PrettyJSONSerializer: DefaultJSONSerializer {
         for i in 0 ..< a.count {
             s += "\n"
             s += indent()
-            s += a[i].serialize(self)
+            s += serializeToString(a[i])
 
             if i != (a.count - 1) {
                 s += ","
@@ -106,17 +108,15 @@ public final class PrettyJSONSerializer: DefaultJSONSerializer {
         indentLevel += 1
         var i = 0
 
-        var keys = Array(o.keys)
-        keys.sortInPlace()
-
-        for key in keys {
+        for (key, value) in o {
             s += "\n"
             s += indent()
-            s += "\(escapeAsJSONString(key)): \(o[key]!.serialize(self))"
+            s += "\(escapeAsJSONString(key)): \(serialize(value))"
 
             if i != (o.count - 1) {
                 s += ","
             }
+
             i += 1
         }
 

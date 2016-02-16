@@ -30,38 +30,60 @@
     import Darwin.C
 #endif
 
-public struct JSONParser {
-    public static func parse(source: String) throws -> JSON {
-        return try GenericJSONParser(source.utf8).parse()
-    }
+@_exported import Data
 
-    public static func parse(source: [UInt8]) throws -> JSON {
-        return try GenericJSONParser(source).parse()
-    }
+enum JSONParseError: ErrorType, CustomStringConvertible {
+    case UnexpectedTokenError(reason: String, lineNumber: Int, columnNumber: Int)
+    case InsufficientTokenError(reason: String, lineNumber: Int, columnNumber: Int)
+    case ExtraTokenError(reason: String, lineNumber: Int, columnNumber: Int)
+    case NonStringKeyError(reason: String, lineNumber: Int, columnNumber: Int)
+    case InvalidStringError(reason: String, lineNumber: Int, columnNumber: Int)
+    case InvalidNumberError(reason: String, lineNumber: Int, columnNumber: Int)
 
-    public static func parse(source: [Int8]) throws -> JSON {
-        return try parse(source.map({UInt8(bitPattern: $0)}))
+    var description: String {
+        switch self {
+        case UnexpectedTokenError(let r, let l, let c):
+            return "UnexpectedTokenError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
+        case InsufficientTokenError(let r, let l, let c):
+            return "InsufficientTokenError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
+        case ExtraTokenError(let r, let l, let c):
+            return "ExtraTokenError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
+        case NonStringKeyError(let r, let l, let c):
+            return "NonStringKeyError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
+        case InvalidStringError(let r, let l, let c):
+            return "InvalidStringError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
+        case InvalidNumberError(let r, let l, let c):
+            return "InvalidNumberError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
+        }
     }
 }
 
-public class GenericJSONParser<ByteSequence: CollectionType where ByteSequence.Generator.Element == UInt8> {
-    public typealias Source = ByteSequence
+public struct JSONParser {
+    public init() {}
+
+    public func parse(data: Data) throws -> JSON {
+        return try GenericJSONParser(data).parse()
+    }
+}
+
+class GenericJSONParser<ByteSequence: CollectionType where ByteSequence.Generator.Element == UInt8> {
+    typealias Source = ByteSequence
     typealias Char = Source.Generator.Element
 
     let source: Source
     var cur: Source.Index
     let end: Source.Index
 
-    public var lineNumber = 1
-    public var columnNumber = 1
+    var lineNumber = 1
+    var columnNumber = 1
 
-    public init(_ source: Source) {
+    init(_ source: Source) {
         self.source = source
         self.cur = source.startIndex
         self.end = source.endIndex
     }
 
-    public func parse() throws -> JSON {
+    func parse() throws -> JSON {
         let JSON = try parseValue()
         skipWhitespaces()
         if (cur == end) {
@@ -358,7 +380,7 @@ extension GenericJSONParser {
             let JSON = try parseValue()
             skipWhitespaces()
             array.append(JSON)
-            
+
             if expect(",") {
                 continue
             } else if expect("]") {
@@ -371,16 +393,16 @@ extension GenericJSONParser {
                 )
             }
         }
-        
+
         return .ArrayValue(array)
     }
-    
-    
+
+
     private func expect(target: StaticString) -> Bool {
         if cur == end {
             return false
         }
-        
+
         if !isIdentifier(target.utf8Start.memory) {
             if target.utf8Start.memory == currentChar {
                 advance()
@@ -389,14 +411,14 @@ extension GenericJSONParser {
                 return false
             }
         }
-        
+
         let start = cur
         let l = lineNumber
         let c = columnNumber
-        
+
         var p = target.utf8Start
         let endp = p.advancedBy(Int(target.byteSize))
-        
+
         while p != endp {
             if p.memory != currentChar {
                 cur = start
@@ -407,10 +429,10 @@ extension GenericJSONParser {
             p += 1
             advance()
         }
-        
+
         return true
     }
-    
+
     // only "true", "false", "null" are identifiers
     private func isIdentifier(char: Char) -> Bool {
         switch char {
@@ -420,24 +442,24 @@ extension GenericJSONParser {
             return false
         }
     }
-    
+
     private func advance() {
         assert(cur != end, "out of range")
-        cur++
-        
+        cur = cur.successor()
+
         if cur != end {
             switch currentChar {
-                
+
             case Char(ascii: "\n"):
                 lineNumber += 1
                 columnNumber = 1
-                
+
             default:
                 columnNumber += 1
             }
         }
     }
-    
+
     private func skipWhitespaces() {
         while cur != end {
             switch currentChar {
