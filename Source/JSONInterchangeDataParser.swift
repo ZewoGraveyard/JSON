@@ -112,9 +112,9 @@ extension GenericJSONInterchangeDataParser {
         }
 
         switch currentChar {
-        case Char(ascii: "n"): return try parseSymbol("null", InterchangeData.NullValue)
-        case Char(ascii: "t"): return try parseSymbol("true", InterchangeData.BooleanValue(true))
-        case Char(ascii: "f"): return try parseSymbol("false", InterchangeData.BooleanValue(false))
+        case Char(ascii: "n"): return try parseSymbol("null", InterchangeData.Null)
+        case Char(ascii: "t"): return try parseSymbol("true", InterchangeData.Boolean(true))
+        case Char(ascii: "f"): return try parseSymbol("false", InterchangeData.Boolean(false))
         case Char(ascii: "-"), Char(ascii: "0") ... Char(ascii: "9"): return try parseNumber()
         case Char(ascii: "\""): return try parseString()
         case Char(ascii: "{"): return try parseObject()
@@ -195,7 +195,7 @@ extension GenericJSONInterchangeDataParser {
 
         buffer.append(0)
         let s = String.fromCString(buffer)!
-        return .StringValue(s)
+        return .Text(s)
     }
 
     private func parseEscapedChar() -> UnicodeScalar? {
@@ -317,7 +317,7 @@ extension GenericJSONInterchangeDataParser {
             exponent *= expSign
         }
 
-        return .NumberValue(sign * (Double(integer) + fraction) * pow(10, Double(exponent)))
+        return .Number(sign * (Double(integer) + fraction) * pow(10, Double(exponent)))
     }
 
     private func parseObject() throws -> InterchangeData {
@@ -330,7 +330,7 @@ extension GenericJSONInterchangeDataParser {
             let keyValue = try parseValue()
 
             switch keyValue {
-            case .StringValue(let key):
+            case .Text(let key):
                 skipWhitespaces()
 
                 if !expect(":") {
@@ -366,7 +366,7 @@ extension GenericJSONInterchangeDataParser {
             }
         }
 
-        return .ObjectValue(object)
+        return .Dictionary(object)
     }
 
     private func parseArray() throws -> InterchangeData {
@@ -394,7 +394,7 @@ extension GenericJSONInterchangeDataParser {
             }
         }
 
-        return .ArrayValue(array)
+        return .Array(array)
     }
 
 

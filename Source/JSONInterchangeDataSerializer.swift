@@ -26,21 +26,26 @@
 
 @_exported import InterchangeData
 
-public class JSONInterchangeDataSerializer: InterchangeDataSerializer {
-    public init() {}
-
-    public func serialize(data: InterchangeData) -> Data {
-        return serializeToString(data).data
+public struct JSONInterchangeDataSerializer: InterchangeDataSerializer {
+    enum Error: ErrorType {
+        case InvalidInterchangeData
     }
 
-    public func serializeToString(data: InterchangeData) -> String {
+    public init() {}
+
+    public func serialize(data: InterchangeData) throws -> Data {
+        return try serializeToString(data).data
+    }
+
+    public func serializeToString(data: InterchangeData) throws -> String {
         switch data {
-        case .NullValue: return "null"
-        case .BooleanValue(let b): return b ? "true" : "false"
-        case .NumberValue(let n): return serializeNumber(n)
-        case .StringValue(let s): return escapeAsJSONString(s)
-        case .ArrayValue(let a): return serializeArray(a)
-        case .ObjectValue(let o): return serializeObject(o)
+        case .Null: return "null"
+        case .Boolean(let boolean): return boolean ? "true" : "false"
+        case .Number(let number): return serializeNumber(number)
+        case .Text(let text): return escapeAsJSONString(text)
+        case .Array(let array): return try serializeArray(array)
+        case .Dictionary(let dictionary): return try serializeDictionary(dictionary)
+        default: throw Error.InvalidInterchangeData
         }
     }
 
@@ -52,11 +57,11 @@ public class JSONInterchangeDataSerializer: InterchangeDataSerializer {
         }
     }
 
-    func serializeArray(a: [InterchangeData]) -> String {
+    func serializeArray(a: [InterchangeData]) throws -> String {
         var s = "["
 
         for i in 0 ..< a.count {
-            s += serializeToString(a[i])
+            s += try serializeToString(a[i])
 
             if i != (a.count - 1) {
                 s += ","
@@ -66,12 +71,12 @@ public class JSONInterchangeDataSerializer: InterchangeDataSerializer {
         return s + "]"
     }
 
-    func serializeObject(o: [String: InterchangeData]) -> String {
+    func serializeDictionary(o: [String: InterchangeData]) throws -> String {
         var s = "{"
         var i = 0
 
         for entry in o {
-            s += "\(escapeAsJSONString(entry.0)):\(serialize(entry.1))"
+            s += try "\(escapeAsJSONString(entry.0)):\(serialize(entry.1))"
             if i != (o.count - 1) {
                 s += ","
             }
@@ -79,58 +84,5 @@ public class JSONInterchangeDataSerializer: InterchangeDataSerializer {
         }
 
         return s + "}"
-    }
-}
-
-public final class PrettyJSONInterchangeDataSerializer: JSONInterchangeDataSerializer {
-    var indentLevel = 0
-
-    override public func serializeArray(a: [InterchangeData]) -> String {
-        var s = "["
-        indentLevel += 1
-
-        for i in 0 ..< a.count {
-            s += "\n"
-            s += indent()
-            s += serializeToString(a[i])
-
-            if i != (a.count - 1) {
-                s += ","
-            }
-        }
-
-        indentLevel -= 1
-        return s + "\n" + indent() + "]"
-    }
-
-    override public func serializeObject(o: [String: InterchangeData]) -> String {
-        var s = "{"
-        indentLevel += 1
-        var i = 0
-
-        for (key, value) in o {
-            s += "\n"
-            s += indent()
-            s += "\(escapeAsJSONString(key)): \(serialize(value))"
-
-            if i != (o.count - 1) {
-                s += ","
-            }
-
-            i += 1
-        }
-
-        indentLevel -= 1
-        return s + "\n" + indent() + "}"
-    }
-
-    func indent() -> String {
-        var s = ""
-
-        for _ in 0 ..< indentLevel {
-            s += "    "
-        }
-
-        return s
     }
 }
