@@ -32,7 +32,7 @@
 
 @_exported import Data
 
-enum JSONParseError: ErrorType, CustomStringConvertible {
+enum JSONParseError: ErrorProtocol, CustomStringConvertible {
     case UnexpectedTokenError(reason: String, lineNumber: Int, columnNumber: Int)
     case InsufficientTokenError(reason: String, lineNumber: Int, columnNumber: Int)
     case ExtraTokenError(reason: String, lineNumber: Int, columnNumber: Int)
@@ -66,9 +66,9 @@ public struct JSONParser {
     }
 }
 
-class GenericJSONParser<ByteSequence: CollectionType where ByteSequence.Generator.Element == UInt8> {
+class GenericJSONParser<ByteSequence: Collection where ByteSequence.Iterator.Element == UInt8> {
     typealias Source = ByteSequence
-    typealias Char = Source.Generator.Element
+    typealias Char = Source.Iterator.Element
 
     let source: Source
     var cur: Source.Index
@@ -194,7 +194,7 @@ extension GenericJSONParser {
         }
 
         buffer.append(0)
-        let s = String.fromCString(buffer)!
+        let s = String(validatingUTF8: buffer)!
         return .StringValue(s)
     }
 
@@ -403,8 +403,8 @@ extension GenericJSONParser {
             return false
         }
 
-        if !isIdentifier(target.utf8Start.memory) {
-            if target.utf8Start.memory == currentChar {
+        if !isIdentifier(target.utf8Start.pointee) {
+            if target.utf8Start.pointee == currentChar {
                 advance()
                 return true
             } else {
@@ -417,10 +417,10 @@ extension GenericJSONParser {
         let c = columnNumber
 
         var p = target.utf8Start
-        let endp = p.advancedBy(Int(target.byteSize))
+        let endp = p.advanced(by: Int(target.utf8CodeUnitCount))
 
         while p != endp {
-            if p.memory != currentChar {
+            if p.pointee != currentChar {
                 cur = start
                 lineNumber = l
                 columnNumber = c
@@ -529,13 +529,13 @@ public func escapeAsJSONString(source : String) -> String {
 
     for c in source.characters {
         if let escapedSymbol = escapeMapping[c] {
-            s.appendContentsOf(escapedSymbol)
+            s.append(escapedSymbol)
         } else {
             s.append(c)
         }
     }
 
-    s.appendContentsOf("\"")
+    s.append("\"")
 
     return s
 }

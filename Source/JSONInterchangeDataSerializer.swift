@@ -27,7 +27,7 @@
 @_exported import InterchangeData
 
 public struct JSONInterchangeDataSerializer: InterchangeDataSerializer {
-    enum Error: ErrorType {
+    enum Error: ErrorProtocol {
         case InvalidInterchangeData
     }
 
