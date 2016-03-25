@@ -24,11 +24,9 @@
 //
 // This file has been modified from its original project Swift-JsonSerializer
 
-@_exported import InterchangeData
-
 public struct JSONInterchangeDataSerializer: InterchangeDataSerializer {
     enum Error: ErrorProtocol {
-        case InvalidInterchangeData
+        case invalidInterchangeData
     }
 
     public init() {}
@@ -39,13 +37,13 @@ public struct JSONInterchangeDataSerializer: InterchangeDataSerializer {
 
     public func serializeToString(data: InterchangeData) throws -> String {
         switch data {
-        case .Null: return "null"
-        case .Boolean(let boolean): return boolean ? "true" : "false"
-        case .Number(let number): return serializeNumber(number)
-        case .Text(let text): return escapeAsJSONString(text)
-        case .Array(let array): return try serializeArray(array)
-        case .Dictionary(let dictionary): return try serializeDictionary(dictionary)
-        default: throw Error.InvalidInterchangeData
+        case .nullValue: return "null"
+        case .boolValue(let bool): return bool ? "true" : "false"
+        case .numberValue(let number): return serializeNumber(number)
+        case .stringValue(let text): return escapeAsJSONString(text)
+        case .arrayValue(let array): return try serializeArray(array)
+        case .dictionaryValue(let dictionary): return try serializeDictionary(dictionary)
+        default: throw Error.invalidInterchangeData
         }
     }
 

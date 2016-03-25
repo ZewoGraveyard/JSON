@@ -24,35 +24,27 @@
 //
 // This file has been modified from its original project Swift-JsonSerializer
 
-#if os(Linux)
-    import Glibc
-#else
-    import Darwin.C
-#endif
-
-@_exported import InterchangeData
-
 enum JSONInterchangeDataParseError: ErrorProtocol, CustomStringConvertible {
-    case UnexpectedTokenError(reason: String, lineNumber: Int, columnNumber: Int)
-    case InsufficientTokenError(reason: String, lineNumber: Int, columnNumber: Int)
-    case ExtraTokenError(reason: String, lineNumber: Int, columnNumber: Int)
-    case NonStringKeyError(reason: String, lineNumber: Int, columnNumber: Int)
-    case InvalidStringError(reason: String, lineNumber: Int, columnNumber: Int)
-    case InvalidNumberError(reason: String, lineNumber: Int, columnNumber: Int)
+    case unexpectedTokenError(reason: String, lineNumber: Int, columnNumber: Int)
+    case insufficientTokenError(reason: String, lineNumber: Int, columnNumber: Int)
+    case extraTokenError(reason: String, lineNumber: Int, columnNumber: Int)
+    case nonStringKeyError(reason: String, lineNumber: Int, columnNumber: Int)
+    case invalidStringError(reason: String, lineNumber: Int, columnNumber: Int)
+    case invalidNumberError(reason: String, lineNumber: Int, columnNumber: Int)
 
     var description: String {
         switch self {
-        case UnexpectedTokenError(let r, let l, let c):
+        case unexpectedTokenError(let r, let l, let c):
             return "UnexpectedTokenError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
-        case InsufficientTokenError(let r, let l, let c):
+        case insufficientTokenError(let r, let l, let c):
             return "InsufficientTokenError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
-        case ExtraTokenError(let r, let l, let c):
+        case extraTokenError(let r, let l, let c):
             return "ExtraTokenError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
-        case NonStringKeyError(let r, let l, let c):
+        case nonStringKeyError(let r, let l, let c):
             return "NonStringKeyError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
-        case InvalidStringError(let r, let l, let c):
+        case invalidStringError(let r, let l, let c):
             return "InvalidStringError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
-        case InvalidNumberError(let r, let l, let c):
+        case invalidNumberError(let r, let l, let c):
             return "InvalidNumberError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
         }
     }
@@ -89,7 +81,7 @@ class GenericJSONInterchangeDataParser<ByteSequence: Collection where ByteSequen
         if (cur == end) {
             return JSON
         } else {
-            throw JSONInterchangeDataParseError.ExtraTokenError(
+            throw JSONInterchangeDataParseError.extraTokenError(
                 reason: "extra tokens found",
                 lineNumber: lineNumber,
                 columnNumber: columnNumber
@@ -104,7 +96,7 @@ extension GenericJSONInterchangeDataParser {
     private func parseValue() throws -> InterchangeData {
         skipWhitespaces()
         if cur == end {
-            throw JSONInterchangeDataParseError.InsufficientTokenError(
+            throw JSONInterchangeDataParseError.insufficientTokenError(
                 reason: "unexpected end of tokens",
                 lineNumber: lineNumber,
                 columnNumber: columnNumber
@@ -112,14 +104,14 @@ extension GenericJSONInterchangeDataParser {
         }
 
         switch currentChar {
-        case Char(ascii: "n"): return try parseSymbol("null", InterchangeData.Null)
-        case Char(ascii: "t"): return try parseSymbol("true", InterchangeData.Boolean(true))
-        case Char(ascii: "f"): return try parseSymbol("false", InterchangeData.Boolean(false))
+        case Char(ascii: "n"): return try parseSymbol("null", InterchangeData.nullValue)
+        case Char(ascii: "t"): return try parseSymbol("true", InterchangeData.boolValue(true))
+        case Char(ascii: "f"): return try parseSymbol("false", InterchangeData.boolValue(false))
         case Char(ascii: "-"), Char(ascii: "0") ... Char(ascii: "9"): return try parseNumber()
         case Char(ascii: "\""): return try parseString()
         case Char(ascii: "{"): return try parseObject()
         case Char(ascii: "["): return try parseArray()
-        case (let c): throw JSONInterchangeDataParseError.UnexpectedTokenError(
+        case (let c): throw JSONInterchangeDataParseError.unexpectedTokenError(
             reason: "unexpected token: \(c)",
             lineNumber: lineNumber,
             columnNumber: columnNumber
@@ -143,7 +135,7 @@ extension GenericJSONInterchangeDataParser {
         if expect(target) {
             return iftrue()
         } else {
-            throw JSONInterchangeDataParseError.UnexpectedTokenError(
+            throw JSONInterchangeDataParseError.unexpectedTokenError(
                 reason: "expected \"\(target)\" but \(currentSymbol)",
                 lineNumber: lineNumber,
                 columnNumber: columnNumber
@@ -161,7 +153,7 @@ extension GenericJSONInterchangeDataParser {
             case Char(ascii: "\\"):
                 advance()
                 if (cur == end) {
-                    throw JSONInterchangeDataParseError.InvalidStringError(
+                    throw JSONInterchangeDataParseError.invalidStringError(
                         reason: "unexpected end of a string literal",
                         lineNumber: lineNumber,
                         columnNumber: columnNumber
@@ -173,7 +165,7 @@ extension GenericJSONInterchangeDataParser {
                         buffer.append(CChar(bitPattern: u))
                     }
                 } else {
-                    throw JSONInterchangeDataParseError.InvalidStringError(
+                    throw JSONInterchangeDataParseError.invalidStringError(
                         reason: "invalid escape sequence",
                         lineNumber: lineNumber,
                         columnNumber: columnNumber
@@ -186,7 +178,7 @@ extension GenericJSONInterchangeDataParser {
         }
 
         if !expect("\"") {
-            throw JSONInterchangeDataParseError.InvalidStringError(
+            throw JSONInterchangeDataParseError.invalidStringError(
                 reason: "missing double quote",
                 lineNumber: lineNumber,
                 columnNumber: columnNumber
@@ -195,7 +187,7 @@ extension GenericJSONInterchangeDataParser {
 
         buffer.append(0)
         let s = String(validatingUTF8: buffer)!
-        return .Text(s)
+        return .stringValue(s)
     }
 
     private func parseEscapedChar() -> UnicodeScalar? {
@@ -243,7 +235,7 @@ extension GenericJSONInterchangeDataParser {
                 advance()
             }
         default:
-            throw JSONInterchangeDataParseError.InvalidStringError(
+            throw JSONInterchangeDataParseError.invalidStringError(
                 reason: "missing double quote",
                 lineNumber: lineNumber,
                 columnNumber: columnNumber
@@ -251,7 +243,7 @@ extension GenericJSONInterchangeDataParser {
         }
 
         if integer != Int64(Double(integer)) {
-            throw JSONInterchangeDataParseError.InvalidNumberError(
+            throw JSONInterchangeDataParseError.invalidNumberError(
                 reason: "too large number",
                 lineNumber: lineNumber,
                 columnNumber: columnNumber
@@ -276,7 +268,7 @@ extension GenericJSONInterchangeDataParser {
             }
 
             if fractionLength == 0 {
-                throw JSONInterchangeDataParseError.InvalidNumberError(
+                throw JSONInterchangeDataParseError.invalidNumberError(
                     reason: "insufficient fraction part in number",
                     lineNumber: lineNumber,
                     columnNumber: columnNumber
@@ -307,7 +299,7 @@ extension GenericJSONInterchangeDataParser {
             }
 
             if exponentLength == 0 {
-                throw JSONInterchangeDataParseError.InvalidNumberError(
+                throw JSONInterchangeDataParseError.invalidNumberError(
                     reason: "insufficient exponent part in number",
                     lineNumber: lineNumber,
                     columnNumber: columnNumber
@@ -317,7 +309,7 @@ extension GenericJSONInterchangeDataParser {
             exponent *= expSign
         }
 
-        return .Number(sign * (Double(integer) + fraction) * pow(10, Double(exponent)))
+        return .numberValue(sign * (Double(integer) + fraction) * pow(10, Double(exponent)))
     }
 
     private func parseObject() throws -> InterchangeData {
@@ -330,11 +322,11 @@ extension GenericJSONInterchangeDataParser {
             let keyValue = try parseValue()
 
             switch keyValue {
-            case .Text(let key):
+            case .stringValue(let key):
                 skipWhitespaces()
 
                 if !expect(":") {
-                    throw JSONInterchangeDataParseError.UnexpectedTokenError(
+                    throw JSONInterchangeDataParseError.unexpectedTokenError(
                         reason: "missing colon (:)",
                         lineNumber: lineNumber,
                         columnNumber: columnNumber
@@ -351,14 +343,14 @@ extension GenericJSONInterchangeDataParser {
                 } else if expect("}") {
                     break LOOP
                 } else {
-                    throw JSONInterchangeDataParseError.UnexpectedTokenError(
+                    throw JSONInterchangeDataParseError.unexpectedTokenError(
                         reason: "missing comma (,)",
                         lineNumber: lineNumber,
                         columnNumber: columnNumber
                     )
                 }
             default:
-                throw JSONInterchangeDataParseError.NonStringKeyError(
+                throw JSONInterchangeDataParseError.nonStringKeyError(
                     reason: "unexpected value for object key",
                     lineNumber: lineNumber,
                     columnNumber: columnNumber
@@ -366,7 +358,7 @@ extension GenericJSONInterchangeDataParser {
             }
         }
 
-        return .Dictionary(object)
+        return .dictionaryValue(object)
     }
 
     private func parseArray() throws -> InterchangeData {
@@ -386,7 +378,7 @@ extension GenericJSONInterchangeDataParser {
             } else if expect("]") {
                 break LOOP
             } else {
-                throw JSONInterchangeDataParseError.UnexpectedTokenError(
+                throw JSONInterchangeDataParseError.unexpectedTokenError(
                     reason: "missing comma (,) (token: \(currentSymbol))",
                     lineNumber: lineNumber,
                     columnNumber: columnNumber
@@ -394,7 +386,7 @@ extension GenericJSONInterchangeDataParser {
             }
         }
 
-        return .Array(array)
+        return .arrayValue(array)
     }
 
 

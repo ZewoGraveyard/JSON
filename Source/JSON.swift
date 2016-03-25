@@ -22,87 +22,89 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+@_exported import InterchangeData
+
 public enum JSONError: ErrorProtocol {
-    case IncompatibleType
+    case incompatibleType
 }
 
 public enum JSON {
-    case NullValue
-    case BooleanValue(Bool)
-    case NumberValue(Double)
-    case StringValue(String)
-    case ArrayValue([JSON])
-    case ObjectValue([String: JSON])
+    case nullValue
+    case booleanValue(Bool)
+    case numberValue(Double)
+    case stringValue(String)
+    case arrayValue([JSON])
+    case objectValue([String: JSON])
 
     public static func from(value: Bool) -> JSON {
-        return .BooleanValue(value)
+        return .booleanValue(value)
     }
 
     public static func from(value: Double) -> JSON {
-        return .NumberValue(value)
+        return .numberValue(value)
     }
 
     public static func from(value: Int) -> JSON {
-        return .NumberValue(Double(value))
+        return .numberValue(Double(value))
     }
 
     public static func from(value: String) -> JSON {
-        return .StringValue(value)
+        return .stringValue(value)
     }
 
     public static func from(value: [JSON]) -> JSON {
-        return .ArrayValue(value)
+        return .arrayValue(value)
     }
 
     public static func from(value: [String: JSON]) -> JSON {
-        return .ObjectValue(value)
+        return .objectValue(value)
     }
 
     public var isBoolean: Bool {
         switch self {
-        case .BooleanValue: return true
+        case .booleanValue: return true
         default: return false
         }
     }
 
     public var isNumber: Bool {
         switch self {
-        case .NumberValue: return true
+        case .numberValue: return true
         default: return false
         }
     }
 
     public var isString: Bool {
         switch self {
-        case .StringValue: return true
+        case .stringValue: return true
         default: return false
         }
     }
 
     public var isArray: Bool {
         switch self {
-        case .ArrayValue: return true
+        case .arrayValue: return true
         default: return false
         }
     }
 
     public var isObject: Bool {
         switch self {
-        case .ObjectValue: return true
+        case .objectValue: return true
         default: return false
         }
     }
 
     public var bool: Bool? {
         switch self {
-        case .BooleanValue(let b): return b
+        case .booleanValue(let b): return b
         default: return nil
         }
     }
 
     public var double: Double? {
         switch self {
-        case .NumberValue(let n): return n
+        case .numberValue(let n): return n
         default: return nil
         }
     }
@@ -123,65 +125,65 @@ public enum JSON {
 
     public var string: String? {
         switch self {
-        case .StringValue(let s): return s
+        case .stringValue(let s): return s
         default: return nil
         }
     }
 
     public var array: [JSON]? {
         switch self {
-        case .ArrayValue(let array): return array
+        case .arrayValue(let array): return array
         default: return nil
         }
     }
 
     public var dictionary: [String: JSON]? {
         switch self {
-        case .ObjectValue(let dictionary): return dictionary
+        case .objectValue(let dictionary): return dictionary
         default: return nil
         }
     }
 
     public func get<T>() -> T? {
         switch self {
-        case NullValue:
+        case nullValue:
             return nil
-        case BooleanValue(let bool):
+        case booleanValue(let bool):
             return bool as? T
-        case NumberValue(let number):
+        case numberValue(let number):
             return number as? T
-        case StringValue(let string):
+        case stringValue(let string):
             return string as? T
-        case ArrayValue(let array):
+        case arrayValue(let array):
             return array as? T
-        case ObjectValue(let object):
+        case objectValue(let object):
             return object as? T
         }
     }
 
     public func get<T>() throws -> T {
         switch self {
-        case BooleanValue(let bool):
+        case booleanValue(let bool):
             if let value = bool as? T {
                 return value
             }
 
-        case NumberValue(let number):
+        case numberValue(let number):
             if let value = number as? T {
                 return value
             }
 
-        case StringValue(let string):
+        case stringValue(let string):
             if let value = string as? T {
                 return value
             }
 
-        case ArrayValue(let array):
+        case arrayValue(let array):
             if let value = array as? T {
                 return value
             }
 
-        case ObjectValue(let object):
+        case objectValue(let object):
             if let value = object as? T {
                 return value
             }
@@ -189,98 +191,100 @@ public enum JSON {
         default: break
         }
 
-        throw JSONError.IncompatibleType
+        throw JSONError.incompatibleType
     }
 
     public func asBool() throws -> Bool {
         if let value = bool {
             return value
         }
-        throw JSONError.IncompatibleType
+        throw JSONError.incompatibleType
     }
 
     public func asDouble() throws -> Double {
         if let value = double {
             return value
         }
-        throw JSONError.IncompatibleType
+        throw JSONError.incompatibleType
     }
 
     public func asInt() throws -> Int {
         if let value = int {
             return value
         }
-        throw JSONError.IncompatibleType
+        throw JSONError.incompatibleType
     }
 
     public func asUInt() throws -> UInt {
         if let value = uint {
             return UInt(value)
         }
-        throw JSONError.IncompatibleType
+        throw JSONError.incompatibleType
     }
 
     public func asString() throws -> String {
         if let value = string {
             return value
         }
-        throw JSONError.IncompatibleType
+        throw JSONError.incompatibleType
     }
 
     public func asArray() throws -> [JSON] {
         if let value = array {
             return value
         }
-        throw JSONError.IncompatibleType
+        throw JSONError.incompatibleType
     }
 
     public func asDictionary() throws -> [String: JSON] {
         if let value = dictionary {
             return value
         }
-        throw JSONError.IncompatibleType
+        throw JSONError.incompatibleType
     }
 
     public subscript(index: Int) -> JSON? {
-        set {
-            switch self {
-            case .ArrayValue(let array):
-                var array = array
-                if index < array.count {
-                    if let json = newValue {
-                        array[index] = json
-                    } else {
-                        array[index] = .NullValue
-                    }
-                    self = .ArrayValue(array)
-                }
-            default: break
-            }
-        }
         get {
             switch self {
-            case .ArrayValue(let array):
+            case .arrayValue(let array):
                 return index < array.count ? array[index] : nil
             default: return nil
+            }
+        }
+
+        set(json) {
+            switch self {
+            case .arrayValue(let array):
+                var array = array
+                if index < array.count {
+                    if let json = json {
+                        array[index] = json
+                    } else {
+                        array[index] = .nullValue
+                    }
+                    self = .arrayValue(array)
+                }
+            default: break
             }
         }
     }
 
     public subscript(key: String) -> JSON? {
-        set {
-            switch self {
-            case .ObjectValue(let object):
-                var object = object
-                object[key] = newValue
-                self = .ObjectValue(object)
-            default: break
-            }
-        }
         get {
             switch self {
-            case .ObjectValue(let object):
+            case .objectValue(let object):
                 return object[key]
             default: return nil
+            }
+        }
+
+        set(json) {
+            switch self {
+            case .objectValue(let object):
+                var object = object
+                object[key] = json
+                self = .objectValue(object)
+            default: break
             }
         }
     }
@@ -290,34 +294,34 @@ extension JSON: Equatable {}
 
 public func ==(lhs: JSON, rhs: JSON) -> Bool {
     switch lhs {
-    case .NullValue:
+    case .nullValue:
         switch rhs {
-        case .NullValue: return true
+        case .nullValue: return true
         default: return false
         }
-    case .BooleanValue(let lhsValue):
+    case .booleanValue(let lhsValue):
         switch rhs {
-        case .BooleanValue(let rhsValue): return lhsValue == rhsValue
+        case .booleanValue(let rhsValue): return lhsValue == rhsValue
         default: return false
         }
-    case .StringValue(let lhsValue):
+    case .stringValue(let lhsValue):
         switch rhs {
-        case .StringValue(let rhsValue): return lhsValue == rhsValue
+        case .stringValue(let rhsValue): return lhsValue == rhsValue
         default: return false
         }
-    case .NumberValue(let lhsValue):
+    case .numberValue(let lhsValue):
         switch rhs {
-        case .NumberValue(let rhsValue): return lhsValue == rhsValue
+        case .numberValue(let rhsValue): return lhsValue == rhsValue
         default: return false
         }
-    case .ArrayValue(let lhsValue):
+    case .arrayValue(let lhsValue):
         switch rhs {
-        case .ArrayValue(let rhsValue): return lhsValue == rhsValue
+        case .arrayValue(let rhsValue): return lhsValue == rhsValue
         default: return false
         }
-    case .ObjectValue(let lhsValue):
+    case .objectValue(let lhsValue):
         switch rhs {
-        case .ObjectValue(let rhsValue): return lhsValue == rhsValue
+        case .objectValue(let rhsValue): return lhsValue == rhsValue
         default: return false
         }
     }
@@ -325,39 +329,39 @@ public func ==(lhs: JSON, rhs: JSON) -> Bool {
 
 extension JSON: NilLiteralConvertible {
     public init(nilLiteral value: Void) {
-        self = .NullValue
+        self = .nullValue
     }
 }
 
 extension JSON: BooleanLiteralConvertible {
     public init(booleanLiteral value: BooleanLiteralType) {
-        self = .BooleanValue(value)
+        self = .booleanValue(value)
     }
 }
 
 extension JSON: IntegerLiteralConvertible {
     public init(integerLiteral value: IntegerLiteralType) {
-        self = .NumberValue(Double(value))
+        self = .numberValue(Double(value))
     }
 }
 
 extension JSON: FloatLiteralConvertible {
     public init(floatLiteral value: FloatLiteralType) {
-        self = .NumberValue(Double(value))
+        self = .numberValue(Double(value))
     }
 }
 
 extension JSON: StringLiteralConvertible {
     public init(unicodeScalarLiteral value: String) {
-        self = .StringValue(value)
+        self = .stringValue(value)
     }
 
     public init(extendedGraphemeClusterLiteral value: String) {
-        self = .StringValue(value)
+        self = .stringValue(value)
     }
 
     public init(stringLiteral value: StringLiteralType) {
-        self = .StringValue(value)
+        self = .stringValue(value)
     }
 }
 
@@ -369,17 +373,17 @@ extension JSON: StringInterpolationConvertible {
             string += s.string!
         }
 
-        self = .StringValue(String(string))
+        self = .stringValue(String(string))
     }
 
     public init<T>(stringInterpolationSegment expr: T) {
-        self = .StringValue(String(expr))
+        self = .stringValue(String(expr))
     }
 }
 
 extension JSON: ArrayLiteralConvertible {
     public init(arrayLiteral elements: JSON...) {
-        self = .ArrayValue(elements)
+        self = .arrayValue(elements)
     }
 }
 
@@ -391,7 +395,7 @@ extension JSON: DictionaryLiteralConvertible {
             dictionary[pair.0] = pair.1
         }
 
-        self = .ObjectValue(dictionary)
+        self = .objectValue(dictionary)
     }
 }
 

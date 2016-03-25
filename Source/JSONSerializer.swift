@@ -24,8 +24,6 @@
 //
 // This file has been modified from its original project Swift-JsonSerializer
 
-@_exported import Data
-
 public class JSONSerializer {
     public init() {}
 
@@ -35,12 +33,12 @@ public class JSONSerializer {
 
     public func serializeToString(json: JSON) -> String {
         switch json {
-        case .NullValue: return "null"
-        case .BooleanValue(let b): return b ? "true" : "false"
-        case .NumberValue(let n): return serializeNumber(n)
-        case .StringValue(let s): return escapeAsJSONString(s)
-        case .ArrayValue(let a): return serializeArray(a)
-        case .ObjectValue(let o): return serializeObject(o)
+        case .nullValue: return "null"
+        case .booleanValue(let b): return b ? "true" : "false"
+        case .numberValue(let n): return serializeNumber(n)
+        case .stringValue(let s): return escapeAsJSONString(s)
+        case .arrayValue(let a): return serializeArray(a)
+        case .objectValue(let o): return serializeObject(o)
         }
     }
 
