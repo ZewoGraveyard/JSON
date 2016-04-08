@@ -24,7 +24,7 @@
 //
 // This file has been modified from its original project Swift-JsonSerializer
 
-enum JSONParseError: ErrorProtocol, CustomStringConvertible {
+public enum JSONParseError: ErrorProtocol, CustomStringConvertible {
     case unexpectedTokenError(reason: String, lineNumber: Int, columnNumber: Int)
     case insufficientTokenError(reason: String, lineNumber: Int, columnNumber: Int)
     case extraTokenError(reason: String, lineNumber: Int, columnNumber: Int)
@@ -32,7 +32,7 @@ enum JSONParseError: ErrorProtocol, CustomStringConvertible {
     case invalidStringError(reason: String, lineNumber: Int, columnNumber: Int)
     case invalidNumberError(reason: String, lineNumber: Int, columnNumber: Int)
 
-    var description: String {
+    public var description: String {
         switch self {
         case unexpectedTokenError(let r, let l, let c):
             return "UnexpectedTokenError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
