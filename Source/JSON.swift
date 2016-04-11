@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-@_exported import InterchangeData
+@_exported import StructuredData
 
 public enum JSONError: ErrorProtocol {
     case incompatibleType

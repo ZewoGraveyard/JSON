@@ -1,4 +1,4 @@
-// JSONInterchangeDataParser.swift
+// JSONStructuredDataParser.swift
 //
 // The MIT License (MIT)
 //
@@ -24,7 +24,7 @@
 //
 // This file has been modified from its original project Swift-JsonSerializer
 
-public enum JSONInterchangeDataParseError: ErrorProtocol, CustomStringConvertible {
+public enum JSONStructuredDataParseError: ErrorProtocol, CustomStringConvertible {
     case unexpectedTokenError(reason: String, lineNumber: Int, columnNumber: Int)
     case insufficientTokenError(reason: String, lineNumber: Int, columnNumber: Int)
     case extraTokenError(reason: String, lineNumber: Int, columnNumber: Int)
@@ -50,15 +50,15 @@ public enum JSONInterchangeDataParseError: ErrorProtocol, CustomStringConvertibl
     }
 }
 
-public struct JSONInterchangeDataParser: InterchangeDataParser {
+public struct JSONStructuredDataParser: StructuredDataParser {
     public init() {}
 
-    public func parse(data: Data) throws -> InterchangeData {
-        return try GenericJSONInterchangeDataParser(data).parse()
+    public func parse(data: Data) throws -> StructuredData {
+        return try GenericJSONStructuredDataParser(data).parse()
     }
 }
 
-class GenericJSONInterchangeDataParser<ByteSequence: Collection where ByteSequence.Iterator.Element == UInt8> {
+class GenericJSONStructuredDataParser<ByteSequence: Collection where ByteSequence.Iterator.Element == UInt8> {
     typealias Source = ByteSequence
     typealias Char = Source.Iterator.Element
 
@@ -75,13 +75,13 @@ class GenericJSONInterchangeDataParser<ByteSequence: Collection where ByteSequen
         self.end = source.endIndex
     }
 
-    func parse() throws -> InterchangeData {
+    func parse() throws -> StructuredData {
         let JSON = try parseValue()
         skipWhitespaces()
         if (cur == end) {
             return JSON
         } else {
-            throw JSONInterchangeDataParseError.extraTokenError(
+            throw JSONStructuredDataParseError.extraTokenError(
                 reason: "extra tokens found",
                 lineNumber: lineNumber,
                 columnNumber: columnNumber
@@ -92,11 +92,11 @@ class GenericJSONInterchangeDataParser<ByteSequence: Collection where ByteSequen
 
 // MARK: - Private
 
-extension GenericJSONInterchangeDataParser {
-    private func parseValue() throws -> InterchangeData {
+extension GenericJSONStructuredDataParser {
+    private func parseValue() throws -> StructuredData {
         skipWhitespaces()
         if cur == end {
-            throw JSONInterchangeDataParseError.insufficientTokenError(
+            throw JSONStructuredDataParseError.insufficientTokenError(
                 reason: "unexpected end of tokens",
                 lineNumber: lineNumber,
                 columnNumber: columnNumber
@@ -104,14 +104,14 @@ extension GenericJSONInterchangeDataParser {
         }
 
         switch currentChar {
-        case Char(ascii: "n"): return try parseSymbol("null", InterchangeData.nullValue)
-        case Char(ascii: "t"): return try parseSymbol("true", InterchangeData.boolValue(true))
-        case Char(ascii: "f"): return try parseSymbol("false", InterchangeData.boolValue(false))
+        case Char(ascii: "n"): return try parseSymbol("null", StructuredData.nullValue)
+        case Char(ascii: "t"): return try parseSymbol("true", StructuredData.boolValue(true))
+        case Char(ascii: "f"): return try parseSymbol("false", StructuredData.boolValue(false))
         case Char(ascii: "-"), Char(ascii: "0") ... Char(ascii: "9"): return try parseNumber()
         case Char(ascii: "\""): return try parseString()
         case Char(ascii: "{"): return try parseObject()
         case Char(ascii: "["): return try parseArray()
-        case (let c): throw JSONInterchangeDataParseError.unexpectedTokenError(
+        case (let c): throw JSONStructuredDataParseError.unexpectedTokenError(
             reason: "unexpected token: \(c)",
             lineNumber: lineNumber,
             columnNumber: columnNumber
@@ -131,11 +131,11 @@ extension GenericJSONInterchangeDataParser {
         return Character(UnicodeScalar(currentChar))
     }
 
-    private func parseSymbol(target: StaticString, @autoclosure _ iftrue: Void -> InterchangeData) throws -> InterchangeData {
+    private func parseSymbol(target: StaticString, @autoclosure _ iftrue: Void -> StructuredData) throws -> StructuredData {
         if expect(target) {
             return iftrue()
         } else {
-            throw JSONInterchangeDataParseError.unexpectedTokenError(
+            throw JSONStructuredDataParseError.unexpectedTokenError(
                 reason: "expected \"\(target)\" but \(currentSymbol)",
                 lineNumber: lineNumber,
                 columnNumber: columnNumber
@@ -143,7 +143,7 @@ extension GenericJSONInterchangeDataParser {
         }
     }
 
-    private func parseString() throws -> InterchangeData {
+    private func parseString() throws -> StructuredData {
         assert(currentChar == Char(ascii: "\""), "points a double quote")
         advance()
         var buffer: [CChar] = []
@@ -153,7 +153,7 @@ extension GenericJSONInterchangeDataParser {
             case Char(ascii: "\\"):
                 advance()
                 if (cur == end) {
-                    throw JSONInterchangeDataParseError.invalidStringError(
+                    throw JSONStructuredDataParseError.invalidStringError(
                         reason: "unexpected end of a string literal",
                         lineNumber: lineNumber,
                         columnNumber: columnNumber
@@ -165,7 +165,7 @@ extension GenericJSONInterchangeDataParser {
                         buffer.append(CChar(bitPattern: u))
                     }
                 } else {
-                    throw JSONInterchangeDataParseError.invalidStringError(
+                    throw JSONStructuredDataParseError.invalidStringError(
                         reason: "invalid escape sequence",
                         lineNumber: lineNumber,
                         columnNumber: columnNumber
@@ -178,7 +178,7 @@ extension GenericJSONInterchangeDataParser {
         }
 
         if !expect("\"") {
-            throw JSONInterchangeDataParseError.invalidStringError(
+            throw JSONStructuredDataParseError.invalidStringError(
                 reason: "missing double quote",
                 lineNumber: lineNumber,
                 columnNumber: columnNumber
@@ -219,7 +219,7 @@ extension GenericJSONInterchangeDataParser {
         }
     }
 
-    private func parseNumber() throws -> InterchangeData {
+    private func parseNumber() throws -> StructuredData {
         let sign = expect("-") ? -1.0 : 1.0
         var integer: Int64 = 0
 
@@ -235,7 +235,7 @@ extension GenericJSONInterchangeDataParser {
                 advance()
             }
         default:
-            throw JSONInterchangeDataParseError.invalidStringError(
+            throw JSONStructuredDataParseError.invalidStringError(
                 reason: "missing double quote",
                 lineNumber: lineNumber,
                 columnNumber: columnNumber
@@ -243,7 +243,7 @@ extension GenericJSONInterchangeDataParser {
         }
 
         if integer != Int64(Double(integer)) {
-            throw JSONInterchangeDataParseError.invalidNumberError(
+            throw JSONStructuredDataParseError.invalidNumberError(
                 reason: "too large number",
                 lineNumber: lineNumber,
                 columnNumber: columnNumber
@@ -268,7 +268,7 @@ extension GenericJSONInterchangeDataParser {
             }
 
             if fractionLength == 0 {
-                throw JSONInterchangeDataParseError.invalidNumberError(
+                throw JSONStructuredDataParseError.invalidNumberError(
                     reason: "insufficient fraction part in number",
                     lineNumber: lineNumber,
                     columnNumber: columnNumber
@@ -299,7 +299,7 @@ extension GenericJSONInterchangeDataParser {
             }
 
             if exponentLength == 0 {
-                throw JSONInterchangeDataParseError.invalidNumberError(
+                throw JSONStructuredDataParseError.invalidNumberError(
                     reason: "insufficient exponent part in number",
                     lineNumber: lineNumber,
                     columnNumber: columnNumber
@@ -312,11 +312,11 @@ extension GenericJSONInterchangeDataParser {
         return .numberValue(sign * (Double(integer) + fraction) * pow(10, Double(exponent)))
     }
 
-    private func parseObject() throws -> InterchangeData {
+    private func parseObject() throws -> StructuredData {
         assert(currentChar == Char(ascii: "{"), "points \"{\"")
         advance()
         skipWhitespaces()
-        var object: [String: InterchangeData] = [:]
+        var object: [String: StructuredData] = [:]
 
         LOOP: while cur != end && !expect("}") {
             let keyValue = try parseValue()
@@ -326,7 +326,7 @@ extension GenericJSONInterchangeDataParser {
                 skipWhitespaces()
 
                 if !expect(":") {
-                    throw JSONInterchangeDataParseError.unexpectedTokenError(
+                    throw JSONStructuredDataParseError.unexpectedTokenError(
                         reason: "missing colon (:)",
                         lineNumber: lineNumber,
                         columnNumber: columnNumber
@@ -343,14 +343,14 @@ extension GenericJSONInterchangeDataParser {
                 } else if expect("}") {
                     break LOOP
                 } else {
-                    throw JSONInterchangeDataParseError.unexpectedTokenError(
+                    throw JSONStructuredDataParseError.unexpectedTokenError(
                         reason: "missing comma (,)",
                         lineNumber: lineNumber,
                         columnNumber: columnNumber
                     )
                 }
             default:
-                throw JSONInterchangeDataParseError.nonStringKeyError(
+                throw JSONStructuredDataParseError.nonStringKeyError(
                     reason: "unexpected value for object key",
                     lineNumber: lineNumber,
                     columnNumber: columnNumber
@@ -361,12 +361,12 @@ extension GenericJSONInterchangeDataParser {
         return .dictionaryValue(object)
     }
 
-    private func parseArray() throws -> InterchangeData {
+    private func parseArray() throws -> StructuredData {
         assert(currentChar == Char(ascii: "["), "points \"[\"")
         advance()
         skipWhitespaces()
 
-        var array: [InterchangeData] = []
+        var array: [StructuredData] = []
 
         LOOP: while cur != end && !expect("]") {
             let JSON = try parseValue()
@@ -378,7 +378,7 @@ extension GenericJSONInterchangeDataParser {
             } else if expect("]") {
                 break LOOP
             } else {
-                throw JSONInterchangeDataParseError.unexpectedTokenError(
+                throw JSONStructuredDataParseError.unexpectedTokenError(
                     reason: "missing comma (,) (token: \(currentSymbol))",
                     lineNumber: lineNumber,
                     columnNumber: columnNumber

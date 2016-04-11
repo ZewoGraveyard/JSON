@@ -1,4 +1,4 @@
-// JSONInterchangeDataSerializer.swift
+// JSONStructuredDataSerializer.swift
 //
 // The MIT License (MIT)
 //
@@ -24,18 +24,18 @@
 //
 // This file has been modified from its original project Swift-JsonSerializer
 
-public struct JSONInterchangeDataSerializer: InterchangeDataSerializer {
+public struct JSONStructuredDataSerializer: StructuredDataSerializer {
     enum Error: ErrorProtocol {
-        case invalidInterchangeData
+        case invalidStructuredData
     }
 
     public init() {}
 
-    public func serialize(data: InterchangeData) throws -> Data {
+    public func serialize(data: StructuredData) throws -> Data {
         return try serializeToString(data).data
     }
 
-    public func serializeToString(data: InterchangeData) throws -> String {
+    public func serializeToString(data: StructuredData) throws -> String {
         switch data {
         case .nullValue: return "null"
         case .boolValue(let bool): return bool ? "true" : "false"
@@ -43,7 +43,7 @@ public struct JSONInterchangeDataSerializer: InterchangeDataSerializer {
         case .stringValue(let text): return escapeAsJSONString(text)
         case .arrayValue(let array): return try serializeArray(array)
         case .dictionaryValue(let dictionary): return try serializeDictionary(dictionary)
-        default: throw Error.invalidInterchangeData
+        default: throw Error.invalidStructuredData
         }
     }
 
@@ -55,7 +55,7 @@ public struct JSONInterchangeDataSerializer: InterchangeDataSerializer {
         }
     }
 
-    func serializeArray(a: [InterchangeData]) throws -> String {
+    func serializeArray(a: [StructuredData]) throws -> String {
         var s = "["
 
         for i in 0 ..< a.count {
@@ -69,7 +69,7 @@ public struct JSONInterchangeDataSerializer: InterchangeDataSerializer {
         return s + "]"
     }
 
-    func serializeDictionary(o: [String: InterchangeData]) throws -> String {
+    func serializeDictionary(o: [String: StructuredData]) throws -> String {
         var s = "{"
         var i = 0
 
