@@ -24,6 +24,8 @@
 //
 // This file has been modified from its original project Swift-JsonSerializer
 
+@_exported import OperatingSystem
+
 public enum JSONStructuredDataParseError: ErrorProtocol, CustomStringConvertible {
     case unexpectedTokenError(reason: String, lineNumber: Int, columnNumber: Int)
     case insufficientTokenError(reason: String, lineNumber: Int, columnNumber: Int)
