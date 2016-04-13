@@ -28,35 +28,35 @@ public class JSONSerializer {
     public init() {}
 
     public func serialize(json: JSON) -> Data {
-        return serializeToString(json).data
+        return serializeToString(json: json).data
     }
 
     public func serializeToString(json: JSON) -> String {
         switch json {
         case .nullValue: return "null"
         case .booleanValue(let b): return b ? "true" : "false"
-        case .numberValue(let n): return serializeNumber(n)
-        case .stringValue(let s): return escapeAsJSONString(s)
-        case .arrayValue(let a): return serializeArray(a)
-        case .objectValue(let o): return serializeObject(o)
+        case .numberValue(let n): return serialize(number: n)
+        case .stringValue(let s): return escapeAsJSON(s)
+        case .arrayValue(let a): return serialize(array: a)
+        case .objectValue(let o): return serialize(object: o)
         }
     }
 
-    func serializeNumber(n: Double) -> String {
-        if n == Double(Int64(n)) {
-            return Int64(n).description
+    func serialize(number: Double) -> String {
+        if number == Double(Int64(number)) {
+            return Int64(number).description
         } else {
-            return n.description
+            return number.description
         }
     }
 
-    func serializeArray(a: [JSON]) -> String {
+    func serialize(array: [JSON]) -> String {
         var s = "["
 
-        for i in 0 ..< a.count {
-            s += serializeToString(a[i])
+        for i in 0 ..< array.count {
+            s += serializeToString(json: array[i])
 
-            if i != (a.count - 1) {
+            if i != (array.count - 1) {
                 s += ","
             }
         }
@@ -64,13 +64,13 @@ public class JSONSerializer {
         return s + "]"
     }
 
-    func serializeObject(o: [String: JSON]) -> String {
+    func serialize(object: [String: JSON]) -> String {
         var s = "{"
         var i = 0
 
-        for entry in o {
-            s += "\(escapeAsJSONString(entry.0)):\(serialize(entry.1))"
-            if i != (o.count - 1) {
+        for entry in object {
+            s += "\(escapeAsJSON(entry.0)):\(serialize(json: entry.1))"
+            if i != (object.count - 1) {
                 s += ","
             }
             i += 1
@@ -83,16 +83,16 @@ public class JSONSerializer {
 public final class PrettyJSONSerializer: JSONSerializer {
     var indentLevel = 0
 
-    override public func serializeArray(a: [JSON]) -> String {
+    override public func serialize(array: [JSON]) -> String {
         var s = "["
         indentLevel += 1
 
-        for i in 0 ..< a.count {
+        for i in 0 ..< array.count {
             s += "\n"
             s += indent()
-            s += serializeToString(a[i])
+            s += serializeToString(json: array[i])
 
-            if i != (a.count - 1) {
+            if i != (array.count - 1) {
                 s += ","
             }
         }
@@ -101,17 +101,17 @@ public final class PrettyJSONSerializer: JSONSerializer {
         return s + "\n" + indent() + "]"
     }
 
-    override public func serializeObject(o: [String: JSON]) -> String {
+    override public func serialize(object: [String: JSON]) -> String {
         var s = "{"
         indentLevel += 1
         var i = 0
 
-        for (key, value) in o {
+        for (key, value) in object {
             s += "\n"
             s += indent()
-            s += "\(escapeAsJSONString(key)): \(serialize(value))"
+            s += "\(escapeAsJSON(key)): \(serialize(json: value))"
 
-            if i != (o.count - 1) {
+            if i != (object.count - 1) {
                 s += ","
             }
 

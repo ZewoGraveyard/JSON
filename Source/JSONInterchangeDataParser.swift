@@ -55,7 +55,7 @@ public enum JSONStructuredDataParseError: ErrorProtocol, CustomStringConvertible
 public struct JSONStructuredDataParser: StructuredDataParser {
     public init() {}
 
-    public func parse(data: Data) throws -> StructuredData {
+    public func parse(_ data: Data) throws -> StructuredData {
         return try GenericJSONStructuredDataParser(data).parse()
     }
 }
@@ -133,7 +133,7 @@ extension GenericJSONStructuredDataParser {
         return Character(UnicodeScalar(currentChar))
     }
 
-    private func parseSymbol(target: StaticString, @autoclosure _ iftrue: Void -> StructuredData) throws -> StructuredData {
+    private func parseSymbol(_ target: StaticString, @autoclosure _ iftrue: Void -> StructuredData) throws -> StructuredData {
         if expect(target) {
             return iftrue()
         } else {
@@ -392,7 +392,7 @@ extension GenericJSONStructuredDataParser {
     }
 
 
-    private func expect(target: StaticString) -> Bool {
+    private func expect(_ target: StaticString) -> Bool {
         if cur == end {
             return false
         }
@@ -428,7 +428,7 @@ extension GenericJSONStructuredDataParser {
     }
 
     // only "true", "false", "null" are identifiers
-    private func isIdentifier(char: Char) -> Bool {
+    private func isIdentifier(_ char: Char) -> Bool {
         switch char {
         case Char(ascii: "a") ... Char(ascii: "z"):
             return true

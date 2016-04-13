@@ -36,27 +36,27 @@ public enum JSON {
     case arrayValue([JSON])
     case objectValue([String: JSON])
 
-    public static func from(value: Bool) -> JSON {
+    public static func from(_ value: Bool) -> JSON {
         return .booleanValue(value)
     }
 
-    public static func from(value: Double) -> JSON {
+    public static func from(_ value: Double) -> JSON {
         return .numberValue(value)
     }
 
-    public static func from(value: Int) -> JSON {
+    public static func from(_ value: Int) -> JSON {
         return .numberValue(Double(value))
     }
 
-    public static func from(value: String) -> JSON {
+    public static func from(_ value: String) -> JSON {
         return .stringValue(value)
     }
 
-    public static func from(value: [JSON]) -> JSON {
+    public static func from(_ value: [JSON]) -> JSON {
         return .arrayValue(value)
     }
 
-    public static func from(value: [String: JSON]) -> JSON {
+    public static func from(_ value: [String: JSON]) -> JSON {
         return .objectValue(value)
     }
 
@@ -401,12 +401,12 @@ extension JSON: DictionaryLiteralConvertible {
 
 extension JSON: CustomStringConvertible {
     public var description: String {
-        return JSONSerializer().serializeToString(self)
+        return JSONSerializer().serializeToString(json: self)
     }
 }
 
 extension JSON: CustomDebugStringConvertible {
     public var debugDescription: String {
-        return PrettyJSONSerializer().serializeToString(self)
+        return PrettyJSONSerializer().serializeToString(json: self)
     }
 }
