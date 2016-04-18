@@ -24,7 +24,11 @@
 //
 // This file has been modified from its original project Swift-JsonSerializer
 
-@_exported import OperatingSystem
+#if os(Linux)
+    @_exported import Glibc
+#else
+    @_exported import Darwin.C
+#endif
 
 public enum JSONStructuredDataParseError: ErrorProtocol, CustomStringConvertible {
     case unexpectedTokenError(reason: String, lineNumber: Int, columnNumber: Int)
