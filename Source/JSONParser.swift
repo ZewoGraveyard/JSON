@@ -131,7 +131,7 @@ extension GenericJSONParser {
         return Character(UnicodeScalar(currentChar))
     }
 
-    private func parseSymbol(target: StaticString, @autoclosure _ iftrue: Void -> JSON) throws -> JSON {
+    private func parseSymbol(_ target: StaticString, @autoclosure _ iftrue: Void -> JSON) throws -> JSON {
         if expect(target) {
             return iftrue()
         } else {
@@ -390,7 +390,7 @@ extension GenericJSONParser {
     }
 
 
-    private func expect(target: StaticString) -> Bool {
+    private func expect(_ target: StaticString) -> Bool {
         if cur == end {
             return false
         }
@@ -426,7 +426,7 @@ extension GenericJSONParser {
     }
 
     // only "true", "false", "null" are identifiers
-    private func isIdentifier(char: Char) -> Bool {
+    private func isIdentifier(_ char: Char) -> Bool {
         switch char {
         case Char(ascii: "a") ... Char(ascii: "z"):
             return true
@@ -516,7 +516,7 @@ let digitMapping: [UnicodeScalar:Int] = [
     "9": 9
 ]
 
-public func escapeAsJSONString(source : String) -> String {
+public func escapeAsJSON(_ source : String) -> String {
     var s = "\""
 
     for c in source.characters {
@@ -532,10 +532,10 @@ public func escapeAsJSONString(source : String) -> String {
     return s
 }
 
-func digitToInt(byte: UInt8) -> Int? {
+func digitToInt(_ byte: UInt8) -> Int? {
     return digitMapping[UnicodeScalar(byte)]
 }
 
-func hexToDigit(byte: UInt8) -> UInt32? {
+func hexToDigit(_ byte: UInt8) -> UInt32? {
     return hexMapping[UnicodeScalar(byte)]
 }

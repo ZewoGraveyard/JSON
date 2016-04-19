@@ -31,37 +31,37 @@ public struct JSONStructuredDataSerializer: StructuredDataSerializer {
 
     public init() {}
 
-    public func serialize(data: StructuredData) throws -> Data {
+    public func serialize(_ data: StructuredData) throws -> Data {
         return try serializeToString(data).data
     }
 
-    public func serializeToString(data: StructuredData) throws -> String {
+    public func serializeToString(_ data: StructuredData) throws -> String {
         switch data {
         case .nullValue: return "null"
         case .boolValue(let bool): return bool ? "true" : "false"
-        case .numberValue(let number): return serializeNumber(number)
-        case .stringValue(let text): return escapeAsJSONString(text)
-        case .arrayValue(let array): return try serializeArray(array)
-        case .dictionaryValue(let dictionary): return try serializeDictionary(dictionary)
+        case .numberValue(let number): return serialize(number: number)
+        case .stringValue(let text): return escapeAsJSON(text)
+        case .arrayValue(let array): return try serialize(array: array)
+        case .dictionaryValue(let dictionary): return try serialize(dictionary: dictionary)
         default: throw Error.invalidStructuredData
         }
     }
 
-    func serializeNumber(n: Double) -> String {
-        if n == Double(Int64(n)) {
-            return Int64(n).description
+    func serialize(number: Double) -> String {
+        if number == Double(Int64(number)) {
+            return Int64(number).description
         } else {
-            return n.description
+            return number.description
         }
     }
 
-    func serializeArray(a: [StructuredData]) throws -> String {
+    func serialize(array: [StructuredData]) throws -> String {
         var s = "["
 
-        for i in 0 ..< a.count {
-            s += try serializeToString(a[i])
+        for i in 0 ..< array.count {
+            s += try serializeToString(array[i])
 
-            if i != (a.count - 1) {
+            if i != (array.count - 1) {
                 s += ","
             }
         }
@@ -69,13 +69,13 @@ public struct JSONStructuredDataSerializer: StructuredDataSerializer {
         return s + "]"
     }
 
-    func serializeDictionary(o: [String: StructuredData]) throws -> String {
+    func serialize(dictionary: [String: StructuredData]) throws -> String {
         var s = "{"
         var i = 0
 
-        for entry in o {
-            s += try "\(escapeAsJSONString(entry.0)):\(serialize(entry.1))"
-            if i != (o.count - 1) {
+        for entry in dictionary {
+            s += try "\(escapeAsJSON(entry.0)):\(serialize(entry.1))"
+            if i != (dictionary.count - 1) {
                 s += ","
             }
             i += 1
