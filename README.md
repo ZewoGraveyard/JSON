@@ -5,6 +5,7 @@
 [![Platform][platform-badge]][platform-url]
 [![License][mit-badge]][mit-url]
 [![Slack][slack-badge]][slack-url]
+[![Travis][travis-badge]][travis-url]
 
 ## Installation
 
@@ -26,12 +27,11 @@ If you need any help you can join our [Slack](http://slack.zewo.io) and go to th
 
 [![Slack][slack-image]][slack-url]
 
-Join us on [Slack](http://slack.zewo.io).
+The entire Zewo code base is licensed under MIT. By contributing to Zewo you are contributing to an open and engaged community of brilliant Swift programmers. Join us on [Slack](http://slack.zewo.io) to get to know us!
 
-License
--------
+## License
 
-**JSON** is released under the MIT license. See LICENSE for details.
+This project is released under the MIT license. See [LICENSE](LICENSE) for details.
 
 [swift-badge]: https://img.shields.io/badge/Swift-3.0-orange.svg?style=flat
 [swift-url]: https://swift.org
@@ -44,3 +44,5 @@ License
 [slack-image]: http://s13.postimg.org/ybwy92ktf/Slack.png
 [slack-badge]: https://zewo-slackin.herokuapp.com/badge.svg
 [slack-url]: http://slack.zewo.io
+[travis-badge]: https://travis-ci.org/Zewo/JSON.svg?branch=master
+[travis-url]: https://travis-ci.org/Zewo/JSON
