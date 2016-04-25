@@ -37,7 +37,7 @@ class JSONTests: XCTestCase {
 
         XCTAssert(json["key"]!.string! == "string")
 
-        let serialized = JSONSerializer().serializeToString(json)
+        let serialized = JSONSerializer().serializeToString(json: json)
         XCTAssert(serialized == "{\"key\":\"string\"}")
     }
 }
