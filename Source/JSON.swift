@@ -35,31 +35,27 @@ public enum JSON {
     case stringValue(String)
     case arrayValue([JSON])
     case objectValue([String: JSON])
-
-    public static func from(_ value: Bool) -> JSON {
-        return .booleanValue(value)
+    
+    public init(_ value: JSONRepresentable) {
+        self = value.makeJSON()
     }
-
-    public static func from(_ value: Double) -> JSON {
-        return .numberValue(value)
+    
+    public init(_ value: [JSONRepresentable]) {
+        let value = value.map { $0.makeJSON() }
+        
+        self = .arrayValue(value)
     }
-
-    public static func from(_ value: Int) -> JSON {
-        return .numberValue(Double(value))
+    
+    public init(_ value: [String: JSONRepresentable]) {
+        var data = [String: JSON]()
+        
+        for (key, newValue) in value.map({ ($0.key, $0.value.makeJSON()) }) {
+            data[key] = newValue
+        }
+        
+        self = .objectValue(data)
     }
-
-    public static func from(_ value: String) -> JSON {
-        return .stringValue(value)
-    }
-
-    public static func from(_ value: [JSON]) -> JSON {
-        return .arrayValue(value)
-    }
-
-    public static func from(_ value: [String: JSON]) -> JSON {
-        return .objectValue(value)
-    }
-
+    
     public var isBoolean: Bool {
         switch self {
         case .booleanValue: return true
@@ -382,17 +378,17 @@ extension JSON: StringInterpolationConvertible {
 }
 
 extension JSON: ArrayLiteralConvertible {
-    public init(arrayLiteral elements: JSON...) {
-        self = .arrayValue(elements)
+    public init(arrayLiteral elements: JSONRepresentable...) {
+        self = .arrayValue(elements.map { $0.makeJSON() })
     }
 }
 
 extension JSON: DictionaryLiteralConvertible {
-    public init(dictionaryLiteral elements: (String, JSON)...) {
+    public init(dictionaryLiteral elements: (String, JSONRepresentable)...) {
         var dictionary = [String: JSON](minimumCapacity: elements.count)
 
         for pair in elements {
-            dictionary[pair.0] = pair.1
+            dictionary[pair.0] = pair.1.makeJSON()
         }
 
         self = .objectValue(dictionary)
@@ -408,5 +404,51 @@ extension JSON: CustomStringConvertible {
 extension JSON: CustomDebugStringConvertible {
     public var debugDescription: String {
         return PrettyJSONSerializer().serializeToString(json: self)
+    }
+}
+
+public protocol JSONRepresentable {
+    func makeJSON() -> JSON
+}
+
+extension String: JSONRepresentable {
+    public func makeJSON() -> JSON {
+        return .stringValue(self)
+    }
+}
+
+extension Double: JSONRepresentable {
+    public func makeJSON() -> JSON {
+        return .numberValue(self)
+    }
+}
+
+extension Int: JSONRepresentable {
+    public func makeJSON() -> JSON {
+        return .numberValue(Double(self))
+    }
+}
+
+extension Float: JSONRepresentable {
+    public func makeJSON() -> JSON {
+        return .numberValue(Double(self))
+    }
+}
+
+extension Int32: JSONRepresentable {
+    public func makeJSON() -> JSON {
+        return .numberValue(Double(self))
+    }
+}
+
+extension Bool: JSONRepresentable {
+    public func makeJSON() -> JSON {
+        return .booleanValue(self)
+    }
+}
+
+extension JSON: JSONRepresentable {
+    public func makeJSON() -> JSON {
+        return self
     }
 }
