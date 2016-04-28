@@ -137,7 +137,7 @@ extension GenericJSONStructuredDataParser {
         return Character(UnicodeScalar(currentChar))
     }
 
-    private func parseSymbol(_ target: StaticString, @autoclosure _ iftrue: Void -> StructuredData) throws -> StructuredData {
+    private func parseSymbol(_ target: StaticString, _ iftrue: @autoclosure Void -> StructuredData) throws -> StructuredData {
         if expect(target) {
             return iftrue()
         } else {
