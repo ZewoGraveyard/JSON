@@ -315,7 +315,7 @@ extension GenericJSONStructuredDataParser {
             exponent *= expSign
         }
 
-        return .numberValue(sign * (Double(integer) + fraction) * pow(10, Double(exponent)))
+        return .doubleValue(sign * (Double(integer) + fraction) * pow(10, Double(exponent)))
     }
 
     private func parseObject() throws -> StructuredData {
