@@ -8,6 +8,8 @@
 [![Travis][travis-badge]][travis-url]
 [![Codebeat][codebeat-badge]][codebeat-url]
 
+This is a fork of [Swift-PureJsonSerializer](https://github.com/gfx/Swift-PureJsonSerializer)
+
 ## Installation
 
 ```swift
