@@ -130,7 +130,7 @@ extension GenericJSONStructuredDataParser {
     }
 
     private var nextChar: Char {
-        return source[cur.successor()]
+        return source[source.index(after: cur)]
     }
 
     private var currentSymbol: Character {
@@ -443,7 +443,7 @@ extension GenericJSONStructuredDataParser {
 
     private func advance() {
         assert(cur != end, "out of range")
-        cur = cur.successor()
+        cur = source.index(after: cur)
 
         if cur != end {
             switch currentChar {
