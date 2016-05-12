@@ -131,7 +131,7 @@ extension GenericJSONParser {
         return Character(UnicodeScalar(currentChar))
     }
 
-    private func parseSymbol(_ target: StaticString, _ iftrue: @autoclosure Void -> JSON) throws -> JSON {
+    private func parseSymbol(_ target: StaticString, _ iftrue: @autoclosure (Void) -> JSON) throws -> JSON {
         if expect(target) {
             return iftrue()
         } else {
