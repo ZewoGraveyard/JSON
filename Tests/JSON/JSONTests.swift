@@ -32,7 +32,7 @@ class JSONTests: XCTestCase {
 }
 
 extension JSONTests {
-    static var allTests: [(String, JSONTests -> () throws -> Void)] {
+    static var allTests: [(String, (JSONTests) -> () throws -> Void)] {
         return [
             ("testStringInterpolation", testStringInterpolation),
         ]
