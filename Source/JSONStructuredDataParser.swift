@@ -30,6 +30,8 @@
     @_exported import Darwin.C
 #endif
 
+@_exported import StructuredData
+
 public enum JSONStructuredDataParseError: ErrorProtocol, CustomStringConvertible {
     case unexpectedTokenError(reason: String, lineNumber: Int, columnNumber: Int)
     case insufficientTokenError(reason: String, lineNumber: Int, columnNumber: Int)

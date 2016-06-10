@@ -104,9 +104,9 @@ extension GenericJSONParser {
         }
 
         switch currentChar {
-        case Char(ascii: "n"): return try parseSymbol("null", JSON.nullValue)
-        case Char(ascii: "t"): return try parseSymbol("true", JSON.booleanValue(true))
-        case Char(ascii: "f"): return try parseSymbol("false", JSON.booleanValue(false))
+        case Char(ascii: "n"): return try parseSymbol("null", JSON.null)
+        case Char(ascii: "t"): return try parseSymbol("true", JSON.boolean(true))
+        case Char(ascii: "f"): return try parseSymbol("false", JSON.boolean(false))
         case Char(ascii: "-"), Char(ascii: "0") ... Char(ascii: "9"): return try parseNumber()
         case Char(ascii: "\""): return try parseString()
         case Char(ascii: "{"): return try parseObject()
@@ -187,7 +187,7 @@ extension GenericJSONParser {
 
         buffer.append(0)
         let s = String(validatingUTF8: buffer)!
-        return .stringValue(s)
+        return .string(s)
     }
 
     private func parseEscapedChar() -> UnicodeScalar? {
@@ -309,7 +309,7 @@ extension GenericJSONParser {
             exponent *= expSign
         }
 
-        return .numberValue(sign * (Double(integer) + fraction) * pow(10, Double(exponent)))
+        return .number(JSON.Number.double(sign * (Double(integer) + fraction) * pow(10, Double(exponent))))
     }
 
     private func parseObject() throws -> JSON {
@@ -322,7 +322,7 @@ extension GenericJSONParser {
             let keyValue = try parseValue()
 
             switch keyValue {
-            case .stringValue(let key):
+            case .string(let key):
                 skipWhitespaces()
 
                 if !expect(":") {
@@ -358,7 +358,7 @@ extension GenericJSONParser {
             }
         }
 
-        return .objectValue(object)
+        return .object(object)
     }
 
     private func parseArray() throws -> JSON {
@@ -386,7 +386,7 @@ extension GenericJSONParser {
             }
         }
 
-        return .arrayValue(array)
+        return .array(array)
     }
 
 

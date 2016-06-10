@@ -24,6 +24,8 @@
 //
 // This file has been modified from its original project Swift-JsonSerializer
 
+@_exported import StructuredData
+
 public struct JSONStructuredDataSerializer: StructuredDataSerializer {
     enum Error: ErrorProtocol {
         case invalidStructuredData
