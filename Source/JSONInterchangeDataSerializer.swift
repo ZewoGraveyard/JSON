@@ -37,13 +37,13 @@ public struct JSONStructuredDataSerializer: StructuredDataSerializer {
 
     public func serializeToString(_ data: StructuredData) throws -> String {
         switch data {
-        case .nullValue: return "null"
-        case .boolValue(let bool): return bool ? "true" : "false"
-        case .doubleValue(let number): return serialize(number: number)
-        case .integerValue(let number): return serialize(number: Double(number))
-        case .stringValue(let text): return escapeAsJSON(text)
-        case .arrayValue(let array): return try serialize(array: array)
-        case .dictionaryValue(let dictionary): return try serialize(dictionary: dictionary)
+        case .null: return "null"
+        case .bool(let bool): return bool ? "true" : "false"
+        case .double(let number): return serialize(number: number)
+        case .int(let number): return serialize(number: Double(number))
+        case .string(let text): return escapeAsJSON(text)
+        case .array(let array): return try serialize(array: array)
+        case .dictionary(let dictionary): return try serialize(dictionary: dictionary)
         default: throw Error.invalidStructuredData
         }
     }

@@ -110,9 +110,9 @@ extension GenericJSONStructuredDataParser {
         }
 
         switch currentChar {
-        case Char(ascii: "n"): return try parseSymbol("null", StructuredData.nullValue)
-        case Char(ascii: "t"): return try parseSymbol("true", StructuredData.boolValue(true))
-        case Char(ascii: "f"): return try parseSymbol("false", StructuredData.boolValue(false))
+        case Char(ascii: "n"): return try parseSymbol("null", .null)
+        case Char(ascii: "t"): return try parseSymbol("true", .bool(true))
+        case Char(ascii: "f"): return try parseSymbol("false", .bool(false))
         case Char(ascii: "-"), Char(ascii: "0") ... Char(ascii: "9"): return try parseNumber()
         case Char(ascii: "\""): return try parseString()
         case Char(ascii: "{"): return try parseObject()
@@ -193,7 +193,7 @@ extension GenericJSONStructuredDataParser {
 
         buffer.append(0)
         let s = String(validatingUTF8: buffer)!
-        return .stringValue(s)
+        return .string(s)
     }
 
     private func parseEscapedChar() -> UnicodeScalar? {
@@ -315,7 +315,7 @@ extension GenericJSONStructuredDataParser {
             exponent *= expSign
         }
 
-        return .doubleValue(sign * (Double(integer) + fraction) * pow(10, Double(exponent)))
+        return .double(sign * (Double(integer) + fraction) * pow(10, Double(exponent)))
     }
 
     private func parseObject() throws -> StructuredData {
@@ -328,7 +328,7 @@ extension GenericJSONStructuredDataParser {
             let keyValue = try parseValue()
 
             switch keyValue {
-            case .stringValue(let key):
+            case .string(let key):
                 skipWhitespaces()
 
                 if !expect(":") {
@@ -364,7 +364,7 @@ extension GenericJSONStructuredDataParser {
             }
         }
 
-        return .dictionaryValue(object)
+        return .dictionary(object)
     }
 
     private func parseArray() throws -> StructuredData {
@@ -392,7 +392,7 @@ extension GenericJSONStructuredDataParser {
             }
         }
 
-        return .arrayValue(array)
+        return .array(array)
     }
 
 
