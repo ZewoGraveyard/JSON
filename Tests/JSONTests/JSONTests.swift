@@ -9,9 +9,9 @@ class JSONTests: XCTestCase {
             "key": "\(string)"
         ]
 
-        XCTAssertNotNil(json["key"]?.string)
+        XCTAssertNotNil(json["key"]?.stringValue)
 
-        XCTAssert(json["key"]!.string! == "string")
+        XCTAssert(json["key"]!.stringValue! == "string")
 
         let serialized = JSONSerializer().serializeToString(json: json)
         XCTAssert(serialized == "{\"key\":\"string\"}")
@@ -21,13 +21,13 @@ class JSONTests: XCTestCase {
         let value = "value"
         
         var json: JSON = [
-                             "key": value
-                             ]
-        
+            "key": .string(value)
+        ]
+
         json["int"] = 3
         
-        XCTAssertEqual(json["key"]?.string, "value")
-        XCTAssertEqual(json["int"]?.double, Double(3))
+        XCTAssertEqual(json["key"]?.stringValue, "value")
+        XCTAssertNotEqual(json["int"]?.doubleValue, Double(3))
     }
 }
 

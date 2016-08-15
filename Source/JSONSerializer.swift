@@ -33,20 +33,12 @@ public class JSONSerializer {
 
     public func serializeToString(json: JSON) -> String {
         switch json {
-        case .nullValue: return "null"
-        case .booleanValue(let b): return b ? "true" : "false"
-        case .numberValue(let n): return serialize(number: n)
-        case .stringValue(let s): return escapeAsJSON(s)
-        case .arrayValue(let a): return serialize(array: a)
-        case .objectValue(let o): return serialize(object: o)
-        }
-    }
-
-    func serialize(number: Double) -> String {
-        if number == Double(Int64(number)) {
-            return Int64(number).description
-        } else {
-            return number.description
+        case .null: return "null"
+        case .boolean(let b): return String(b)
+        case .number(let n): return String(describing: n)
+        case .string(let s): return escapeAsJSON(s)
+        case .array(let a): return serialize(array: a)
+        case .object(let o): return serialize(object: o)
         }
     }
 

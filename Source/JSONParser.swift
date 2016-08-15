@@ -24,7 +24,13 @@
 //
 // This file has been modified from its original project Swift-JsonSerializer
 
-public enum JSONParseError: ErrorProtocol, CustomStringConvertible {
+#if os(Linux)
+    import Glibc
+#else
+    import Darwin.C
+#endif
+
+public enum JSONParseError: Error, CustomStringConvertible {
     case unexpectedTokenError(reason: String, lineNumber: Int, columnNumber: Int)
     case insufficientTokenError(reason: String, lineNumber: Int, columnNumber: Int)
     case extraTokenError(reason: String, lineNumber: Int, columnNumber: Int)
@@ -34,17 +40,17 @@ public enum JSONParseError: ErrorProtocol, CustomStringConvertible {
 
     public var description: String {
         switch self {
-        case unexpectedTokenError(let r, let l, let c):
+        case .unexpectedTokenError(let r, let l, let c):
             return "UnexpectedTokenError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
-        case insufficientTokenError(let r, let l, let c):
+        case .insufficientTokenError(let r, let l, let c):
             return "InsufficientTokenError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
-        case extraTokenError(let r, let l, let c):
+        case .extraTokenError(let r, let l, let c):
             return "ExtraTokenError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
-        case nonStringKeyError(let r, let l, let c):
+        case .nonStringKeyError(let r, let l, let c):
             return "NonStringKeyError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
-        case invalidStringError(let r, let l, let c):
+        case .invalidStringError(let r, let l, let c):
             return "InvalidStringError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
-        case invalidNumberError(let r, let l, let c):
+        case .invalidNumberError(let r, let l, let c):
             return "InvalidNumberError!\nLine: \(l)\nColumn: \(c)]\nReason: \(r)"
         }
     }
@@ -58,7 +64,7 @@ public struct JSONParser {
     }
 }
 
-class GenericJSONParser<ByteSequence: Collection where ByteSequence.Iterator.Element == UInt8> {
+class GenericJSONParser<ByteSequence: Collection> where ByteSequence.Iterator.Element == UInt8 {
     typealias Source = ByteSequence
     typealias Char = Source.Iterator.Element
 
@@ -93,7 +99,7 @@ class GenericJSONParser<ByteSequence: Collection where ByteSequence.Iterator.Ele
 // MARK: - Private
 
 extension GenericJSONParser {
-    private func parseValue() throws -> JSON {
+    fileprivate func parseValue() throws -> JSON {
         skipWhitespaces()
         if cur == end {
             throw JSONParseError.insufficientTokenError(
@@ -104,9 +110,9 @@ extension GenericJSONParser {
         }
 
         switch currentChar {
-        case Char(ascii: "n"): return try parseSymbol("null", JSON.nullValue)
-        case Char(ascii: "t"): return try parseSymbol("true", JSON.booleanValue(true))
-        case Char(ascii: "f"): return try parseSymbol("false", JSON.booleanValue(false))
+        case Char(ascii: "n"): return try parseSymbol("null", JSON.null)
+        case Char(ascii: "t"): return try parseSymbol("true", JSON.boolean(true))
+        case Char(ascii: "f"): return try parseSymbol("false", JSON.boolean(false))
         case Char(ascii: "-"), Char(ascii: "0") ... Char(ascii: "9"): return try parseNumber()
         case Char(ascii: "\""): return try parseString()
         case Char(ascii: "{"): return try parseObject()
@@ -187,7 +193,7 @@ extension GenericJSONParser {
 
         buffer.append(0)
         let s = String(validatingUTF8: buffer)!
-        return .stringValue(s)
+        return .string(s)
     }
 
     private func parseEscapedChar() -> UnicodeScalar? {
@@ -309,7 +315,7 @@ extension GenericJSONParser {
             exponent *= expSign
         }
 
-        return .numberValue(sign * (Double(integer) + fraction) * pow(10, Double(exponent)))
+        return .number(JSON.Number.double(sign * (Double(integer) + fraction) * pow(10, Double(exponent))))
     }
 
     private func parseObject() throws -> JSON {
@@ -322,7 +328,7 @@ extension GenericJSONParser {
             let keyValue = try parseValue()
 
             switch keyValue {
-            case .stringValue(let key):
+            case .string(let key):
                 skipWhitespaces()
 
                 if !expect(":") {
@@ -358,7 +364,7 @@ extension GenericJSONParser {
             }
         }
 
-        return .objectValue(object)
+        return .object(object)
     }
 
     private func parseArray() throws -> JSON {
@@ -386,7 +392,7 @@ extension GenericJSONParser {
             }
         }
 
-        return .arrayValue(array)
+        return .array(array)
     }
 
 
@@ -452,7 +458,7 @@ extension GenericJSONParser {
         }
     }
 
-    private func skipWhitespaces() {
+    fileprivate func skipWhitespaces() {
         while cur != end {
             switch currentChar {
             case Char(ascii: " "), Char(ascii: "\t"), Char(ascii: "\r"), Char(ascii: "\n"):
