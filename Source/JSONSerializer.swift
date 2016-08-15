@@ -35,7 +35,7 @@ public class JSONSerializer {
         switch json {
         case .null: return "null"
         case .boolean(let b): return String(b)
-        case .number(let n): return String(n)
+        case .number(let n): return String(describing: n)
         case .string(let s): return escapeAsJSON(s)
         case .array(let a): return serialize(array: a)
         case .object(let o): return serialize(object: o)

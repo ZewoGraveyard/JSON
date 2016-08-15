@@ -25,7 +25,7 @@
 @_exported import C7
 
 extension JSON {
-    public enum Error: ErrorProtocol {
+    public enum JSONError: Error {
         case incompatibleType
     }
 }
@@ -121,7 +121,7 @@ extension JSON {
             return value
         default: break
         }
-        throw Error.incompatibleType
+        throw JSONError.incompatibleType
     }
 
     public func get<T>(_ key: String) throws -> T {
@@ -129,7 +129,7 @@ extension JSON {
             return try value.get()
         }
 
-        throw Error.incompatibleType
+        throw JSONError.incompatibleType
     }
 
     public func get<T>() -> T? {
@@ -188,7 +188,7 @@ extension JSON {
         if let uint = uintValue {
             return UInt(uint)
         }
-        throw Error.incompatibleType
+        throw JSONError.incompatibleType
     }
 
     public func asString() throws -> String {
@@ -211,7 +211,7 @@ extension JSON {
 extension JSON {
     public subscript(index: Int) -> C7.JSON? {
         get {
-            guard let array = arrayValue where index >= 0 && index < array.count else {
+            guard let array = arrayValue, index >= 0 && index < array.count else {
                 return nil
             }
             return array[index]
@@ -284,31 +284,31 @@ public func ==(lhs: JSON, rhs: JSON) -> Bool {
     }
 }
 
-extension JSON: NilLiteralConvertible {
+extension JSON: ExpressibleByNilLiteral {
     public init(nilLiteral value: Void) {
         self = .null
     }
 }
 
-extension JSON: BooleanLiteralConvertible {
+extension JSON: ExpressibleByBooleanLiteral {
     public init(booleanLiteral value: Bool) {
         self = .boolean(value)
     }
 }
 
-extension JSON: IntegerLiteralConvertible {
+extension JSON: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int) {
         self = .number(JSON.Number.integer(value))
     }
 }
 
-extension JSON: FloatLiteralConvertible {
+extension JSON: ExpressibleByFloatLiteral {
     public init(floatLiteral value: Float) {
         self = .number(JSON.Number.double(Double(value)))
     }
 }
 
-extension JSON: StringLiteralConvertible {
+extension JSON: ExpressibleByStringLiteral {
     public init(unicodeScalarLiteral value: String) {
         self = .string(value)
     }
@@ -322,24 +322,24 @@ extension JSON: StringLiteralConvertible {
     }
 }
 
-extension JSON: StringInterpolationConvertible {
+extension JSON: ExpressibleByStringInterpolation {
     public init(stringInterpolation strings: JSON...) {
         let string = strings.reduce("") { $0 + ($1.stringValue ?? "") }
         self = .string(string)
     }
 
     public init<T>(stringInterpolationSegment expr: T) {
-        self = .string(String(expr))
+        self = .string(String(describing: expr))
     }
 }
 
-extension JSON: ArrayLiteralConvertible {
+extension JSON: ExpressibleByArrayLiteral {
     public init(arrayLiteral elements: JSON...) {
         self = .array(elements)
     }
 }
 
-extension JSON: DictionaryLiteralConvertible {
+extension JSON: ExpressibleByDictionaryLiteral {
     public init(dictionaryLiteral elements: (String, JSON)...) {
         var object = [String: JSON](minimumCapacity: elements.count)
 
@@ -354,9 +354,9 @@ extension JSON: DictionaryLiteralConvertible {
 extension JSON.Number: CustomStringConvertible {
     public var description: String {
         switch self {
-        case integer(let i): return String(i)
-        case unsignedInteger(let u): return String(u)
-        case double(let d): return String(d)
+        case .integer(let i): return String(i)
+        case .unsignedInteger(let u): return String(u)
+        case .double(let d): return String(d)
         }
     }
 }
@@ -369,7 +369,7 @@ extension JSON: CustomStringConvertible {
             switch data {
             case .null: return "null"
             case .boolean(let b): return String(b)
-            case .number(let n): return String(n)
+            case .number(let n): return String(describing: n)
             case .string(let s): return escape(s)
             case .array(let a): return serialize(array: a)
             case .object(let o): return serialize(object: o)
@@ -416,7 +416,7 @@ extension JSON: CustomStringConvertible {
 
         func indent() -> String {
             let spaceCount = indentLevel * 4
-            return String(repeating: Character(" "), count: spaceCount)
+            return String(repeating: " ", count: spaceCount)
         }
 
         return serialize(self)
